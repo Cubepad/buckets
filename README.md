@@ -1,50 +1,89 @@
-# Welcome to your Expo app 👋
+README.md:
+# 🏀 Buckets
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Buckets** is a sleek and simple React Native app designed to enhance your basketball experience. With Buckets, you can **track scores in real-time**, **save game histories**, and enjoy a smooth, modern interface built with **React Native Paper**. Whether you're playing a quick 1v1 or a full-court match with friends, Buckets helps you stay on top of the game.
 
-## Get started
+---
 
-1. Install dependencies
+## ✨ Features
 
-   ```bash
-   npm install
-   ```
+- 📋 **Score Tracking**  
+  Keep track of scores in real-time for various game types (1v1, 2v2, full court, etc.).
 
-2. Start the app
+- 💾 **Game History**  
+  Save and view previous games to relive your best moments.
 
-   ```bash
-    npx expo start
-   ```
+- 🌓 **Light & Dark Mode**  
+  Seamlessly switch between light and dark themes for better visibility.
 
-In the output, you'll find options to open the app in a
+- ⚡ **Smooth UI**  
+  Enjoy a clean, fast, and intuitive interface powered by React Native Paper.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🚀 Getting Started
 
-## Get a fresh project
+Follow these steps to get Buckets up and running on your local machine:
 
-When you're ready, run:
+### Prerequisites
+- Node.js (v14+ recommended)
+- npm or yarn
+- Android Studio / Xcode (for running on emulators or devices)
 
-```bash
-npm run reset-project
-```
+### Installation
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+1. **Clone the repository:**
 
-## Learn more
+2. **Install dependencies:**
 
-To learn more about developing your project with Expo, look at the following resources:
+3. **Start the development server:**
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-## Join the community
 
-Join our community of developers creating universal apps.
+2. Run the app on your device/emulator:
+- For iOS:
+  ```
+  npx react-native run-ios
+  ```
+- For Android:
+  ```
+  npx react-native run-android
+  ```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+
+## 🛠️ Technologies Used
+
+Buckets is built using the following technologies:
+
+- [React Native](https://reactnative.dev/) - Framework for building mobile apps.
+- [React Native Paper](https://callstack.github.io/react-native-paper/) - UI library for sleek and responsive components.
+- [Expo](https://expo.dev/) - Simplified development workflow.
+- [AsyncStorage](https://react-native-async-storage.github.io/async-storage/) - For saving game data locally.
+
+---
+
+## 📖 Usage
+
+1. Open the app and select the type of game (e.g., 1v1, 2v2).
+2. Add player names (optional).
+3. Start tracking scores as you play.
+4. Save the game once it’s over to view later in the history section.
+
+---
+
+## 🛡️ License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+---
+
+## 💬 Feedback & Support
+
+Have questions or feedback? Feel free to reach out via [davideniola108@gmail.com](mailto:davideniola108@gmail.com). We’d love to hear from you!
+
+---
+
+## 📂 Project Status
+
+Buckets is actively maintained, and new features are being added regularly! Stay tuned for updates.
