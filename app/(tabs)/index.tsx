@@ -1,74 +1,124 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useState } from "react";
+import { StyleSheet, View, ScrollView, SafeAreaView } from "react-native";
+import { Appbar, Menu, useTheme } from "react-native-paper";
+import ScoreCard from "../../components/ScoreCard"; // Import the updated ScoreCard
+import GameControls from "../../components/GameControls";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+interface ScoreHistory {
+  teamAScore: number;
+  teamBScore: number;
+}
 
 export default function HomeScreen() {
+  const theme = useTheme();
+
+  const [teamAScore, setTeamAScore] = useState<number>(0);
+  const [teamBScore, setTeamBScore] = useState<number>(0);
+  const [scoreHistory, setScoreHistory] = useState<ScoreHistory[]>([
+    { teamAScore: 0, teamBScore: 0 },
+  ]);
+
+  const [visible, setVisible] = React.useState(false);
+  const openMenu = () => setVisible(true);
+  const closeMenu = () => setVisible(false);
+
+  const undoLastAction = () => {
+    if (scoreHistory.length > 1) {
+      const previousStateIndex = scoreHistory.length - 2;
+      const lastScores = scoreHistory[previousStateIndex];
+      setTeamAScore(lastScores.teamAScore);
+      setTeamBScore(lastScores.teamBScore);
+      setScoreHistory((prevHistory) => prevHistory.slice(0, -1));
+    }
+  };
+
+  // updateScore remains the same, it already handles 'A' or 'B'
+  const updateScore = (team: "A" | "B", points: number): void => {
+    const nextTeamAScore = team === "A" ? teamAScore + points : teamAScore;
+    const nextTeamBScore = team === "B" ? teamBScore + points : teamBScore;
+
+    setScoreHistory((prevHistory) => [
+      ...prevHistory,
+      { teamAScore: nextTeamAScore, teamBScore: nextTeamBScore },
+    ]);
+
+    if (team === "A") {
+      setTeamAScore(nextTeamAScore);
+    } else {
+      setTeamBScore(nextTeamBScore);
+    }
+  };
+
+  const resetGame = () => {
+    setTeamAScore(0);
+    setTeamBScore(0);
+    setScoreHistory([{ teamAScore: 0, teamBScore: 0 }]);
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
+    >
+      <Appbar.Header mode="center-aligned" >
+        <Appbar.Content titleStyle={{ fontFamily: 'Manrope_600SemiBold', fontSize: 24 }}   title="Buckets Scoreboard" />
+        <Menu
+          visible={visible}
+          onDismiss={closeMenu}
+          anchor={<Appbar.Action icon="dots-vertical" onPress={openMenu} />}
+        >
+          <Menu.Item onPress={closeMenu} title="Settings" leadingIcon="cog" />
+          <Menu.Item
+            onPress={closeMenu}
+            title="Change Team Name"
+            leadingIcon="rename-box"
+          />
+          <Menu.Item
+            onPress={closeMenu}
+            title="About"
+            leadingIcon="information"
+          />
+        </Menu>
+      </Appbar.Header>
+
+      {/* Use ScrollView to ensure content fits, especially buttons */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        alwaysBounceVertical={false}
+      >
+        {/* Container for the single scorecard */}
+        <View style={styles.scoreCardContainer}>
+          <ScoreCard
+            scoreA={teamAScore}
+            scoreB={teamBScore}
+            updateScore={updateScore}
+            // Optional: pass specific style if needed
+            // style={{}}
+          />
+        </View>
+
+        {/* GameControls remain the same */}
+        <GameControls
+          onUndo={undoLastAction}
+          onNewGame={resetGame}
+          disableUndo={scoreHistory.length <= 1}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  safeArea: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  scrollContainer: {
+    flexGrow: 1, // Ensures ScrollView content can grow
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    justifyContent: "space-between", // Pushes GameControls down if space allows
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  // Renamed scoreCardsRow to scoreCardContainer for clarity
+  scoreCardContainer: {
+    marginBottom: 24, // Keep margin below the card
   },
 });
