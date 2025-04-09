@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { StyleSheet, View, Animated, Easing } from "react-native";
-import { Button, Text, Card, useTheme } from "react-native-paper"; // Removed Surface for this version
+import { Button, Text, Card, useTheme, ProgressBar } from "react-native-paper";
 
 interface ScoreCardProps {
   scoreA: number;
@@ -52,7 +52,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
         duration: 250,
         useNativeDriver: false,
       }).start();
-    }, 600); // Keep flash visible slightly longer
+    }, 600); 
   };
 
   // Effect to trigger animations on score changes
@@ -64,12 +64,6 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
       animatePop(popValueA, scoreA > prevScoreA.current ? "up" : "down");
       prevScoreA.current = scoreA;
       scoreChanged = true;
-    } else {
-      // Ensure value is reset if it didn't change (handles potential race conditions/re-renders)
-      // Note: This might cause a slight flicker if an animation was mid-flight on re-render,
-      // but is generally safer for ensuring non-changed scores aren't offset.
-      // Consider removing if flicker is observed and unwanted.
-      // popValueA.setValue(0);
     }
 
     // Check Team B score change
@@ -77,9 +71,6 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
       animatePop(popValueB, scoreB > prevScoreB.current ? "up" : "down");
       prevScoreB.current = scoreB;
       scoreChanged = true;
-    } else {
-      // Similar reset logic for B
-      // popValueB.setValue(0);
     }
 
     // Trigger border flash if any score changed
@@ -93,21 +84,30 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
     outputRange: [theme.colors.elevation.level1, theme.colors.primary],
   });
 
+  // Compute the progress bar value and handle flip based on leading team.
+  const totalPoints = scoreA + scoreB;
+  const progressValue =
+    totalPoints > 0 ? (scoreA >= scoreB ? scoreA / totalPoints : scoreB / totalPoints) : 0.5;
+
   return (
     <Card
       style={[
         styles.card,
-        { borderColor: interpolatedBorderColor, borderWidth: 2 },
+        {
+          borderColor: interpolatedBorderColor,
+          borderWidth: 2,
+          backgroundColor: theme.colors.elevation.level1,
+        },
         style,
       ]}
     >
       <Card.Content style={styles.cardContent}>
         {/* Team Names Container */}
         <View style={styles.teamNamesContainer}>
-          <Text style={[styles.teamNameText, { color: theme.colors.onSurface, fontFamily: 'Manrope_500Medium' }]}>
+          <Text style={[styles.teamNameText, { color: theme.colors.onSurface, fontFamily: "SpaceGrotesk_500Medium" }]}>
             Team A
           </Text>
-          <Text style={[styles.teamNameText, { color: theme.colors.onSurface, fontFamily: 'Manrope_500Medium'  }]}>
+          <Text style={[styles.teamNameText, { color: theme.colors.onSurface, fontFamily: "SpaceGrotesk_500Medium" }]}>
             Team B
           </Text>
         </View>
@@ -119,7 +119,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             <Animated.Text
               style={[
                 styles.scoreDigit,
-                { color: theme.colors.primary,  },
+                { color: theme.colors.primary },
                 { transform: [{ translateY: popValueA }] },
               ]}
               adjustsFontSizeToFit
@@ -146,6 +146,20 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
               {scoreB}
             </Animated.Text>
           </View>
+        </View>
+
+        {/* New Progress Bar added under the score display */}
+        <View style={styles.progressContainer}>
+          <ProgressBar
+            progress={progressValue}
+            color={theme.colors.primary}
+            style={[
+              styles.progressBar,
+              // If Team B is leading, flip the progress bar to fill from right.
+              scoreA < scoreB && { transform: [{ scaleX: -1 }] },
+            ]}
+            fillStyle={{ borderRadius: 6 }}
+          />
         </View>
 
         {/* Button Area - Two Columns */}
@@ -213,75 +227,80 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 24,
+    borderRadius: 16,
     minHeight: 380, // Slightly increased minHeight for better spacing
-    marginHorizontal: 4, // Add back small horizontal margin if needed within parent
   },
   cardContent: {
     flex: 1,
     alignItems: "center",
-    paddingHorizontal: 16, // Increased horizontal padding
-    paddingVertical: 20, // Increased vertical padding
+    paddingHorizontal: 12,
+    paddingVertical: 20,
     justifyContent: "space-between",
   },
   teamNamesContainer: {
     flexDirection: "row",
-    justifyContent: "space-around", // Space out names
-    width: "115%", // Control width to align roughly above scores
-    marginBottom: 8, // Space between names and score
-    paddingHorizontal: 10, // Padding within the name container
+    justifyContent: "space-around",
+    width: "115%",
+    marginBottom: 8,
+    paddingHorizontal: 10,
   },
   teamNameText: {
-    fontSize: 22, // Slightly smaller than original headline
+    fontSize: 22,
     fontWeight: "600",
     textAlign: "center",
-    flex: 1, // Allow names to take space
+    flex: 1,
   },
   scoreContainer: {
     width: "100%",
-    alignItems: "center", // Center the scoreDisplayRow
+    alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 15, // Adjusted padding
-    // No flex: 1 here, let it size naturally based on content + padding
+    paddingVertical: 15,
   },
-  scoreDisplayRow: { // The row holding the two scores and the dash
+  scoreDisplayRow: {
     flexDirection: "row",
-    alignItems: "center", // Vertically align digits and dash
-    justifyContent: 'center', // Horizontally center the items in the row
-    width: "100%", // Take full width to ensure centering works
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
   },
   scoreDigit: {
-    fontSize: 85, // Slightly larger font size for score
-    textAlign: "center", // Center text within its own Animated.Text boundary
-    paddingHorizontal: 5, // Small padding around digits
-    fontFamily: "SpaceGrotesk_700Bold", // Ensure bold font is used
-    minWidth: 160, // Minimum width to prevent layout shifts
+    fontSize: 85,
+    textAlign: "center",
+    paddingHorizontal: 5,
+    fontFamily: "SpaceGrotesk_700Bold",
+    minWidth: 160,
   },
   scoreSeparator: {
-    fontSize: 50, // Smaller font size for the dash
+    fontSize: 50,
     fontWeight: "bold",
-    marginHorizontal: 10, // Space around the dash
+    marginHorizontal: 10,
     textAlign: "center",
-    lineHeight: 90, // Try to vertically align dash better with large numbers
+    lineHeight: 90,
+  },
+  progressContainer: {
+    width: "100%",
+    paddingHorizontal: 16,
+    marginVertical: 16,
+  },
+  progressBar: {
+    height: 12,
+    borderRadius: 6,
   },
   buttonArea: {
     flexDirection: "row",
     justifyContent: "space-around",
-    alignItems: "flex-start", // Keep alignment to top
+    alignItems: "flex-start",
     width: "100%",
-    marginTop: 25, // Increased space above buttons
-    paddingHorizontal: 5, // Add padding to prevent buttons touching edges if card shrinks
+    marginTop: 25,
   },
   teamButtonColumn: {
     flexDirection: "column",
     justifyContent: "flex-start",
     alignItems: "center",
-    gap: 14, // Increased gap between buttons
-    width: "46%", // Adjusted width for columns
+    gap: 20,
+    width: "46%",
   },
   scoreButton: {
     width: "100%",
-    paddingVertical: 4, // Add some vertical padding to buttons
   },
   buttonLabel: {
     fontSize: 16,

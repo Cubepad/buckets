@@ -145,5 +145,6 @@ const styles = StyleSheet.create({
   labelText: {
     fontSize: 12,
     textAlign: 'center',
+    fontFamily: 'SpaceGrotesk_500Medium',
   },
 });

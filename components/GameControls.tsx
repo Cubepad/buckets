@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
-import { Button, Portal, Dialog, Paragraph, useTheme } from "react-native-paper";
+import { Button, Portal, Dialog, Text, useTheme } from "react-native-paper";
 
 interface GameControlsProps {
   onUndo: () => void;
@@ -86,11 +86,11 @@ const GameControls: React.FC<GameControlsProps> = ({ onUndo, onNewGame, disableU
       </View>
       <Portal>
         <Dialog visible={newGameDialogVisible} onDismiss={hideNewGameDialog}>
-          <Dialog.Title>Confirm New Game</Dialog.Title>
+          <Dialog.Title style={{ fontFamily: "SpaceGrotesk_500Medium" }}>Confirm New Game</Dialog.Title>
           <Dialog.Content>
-            <Paragraph>
+            <Text style={{ fontFamily: "SpaceGrotesk_400Regular" }}>
               Are you sure you want to start a new game? All current scores will be lost.
-            </Paragraph>
+            </Text>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={hideNewGameDialog}>Cancel</Button>

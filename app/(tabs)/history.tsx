@@ -11,7 +11,7 @@ const History = () => {
   return (
     <View  style={{ flex: 1, backgroundColor: theme.colors.surface }}>
       <Appbar.Header>
-        <Appbar.Content titleStyle={{ fontFamily: 'Manrope_600SemiBold', fontSize: 24 }} title="History" />
+        <Appbar.Content titleStyle={{ fontFamily: 'SpaceGrotesk_600SemiBold', fontSize: 24 }} title="History" />
         <Menu
           visible={visible}
           onDismiss={closeMenu}
