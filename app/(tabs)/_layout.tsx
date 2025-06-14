@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, View, Platform } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { BottomNavigation, Text, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import * as NavigationBar from 'expo-navigation-bar';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 // Define our own minimal types for the tab bar props
 interface CustomTabBarProps {
@@ -75,23 +75,12 @@ function CustomTabBar({ state, descriptors, navigation }: CustomTabBarProps) {
         styles.bottomNavigation,
         { backgroundColor: theme.colors.elevation.level2 },
       ]}
-      activeIndicatorStyle={{
-        backgroundColor: theme.colors.secondaryContainer,
-        height: 36,
-        borderRadius: 18,
-      }}
     />
   );
 }
 
 export default function TabLayout() {
   const theme = useTheme();
-
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      NavigationBar.setBackgroundColorAsync(theme.colors.elevation.level2);
-    }
-  }, [theme]);
 
   return (
     <>
@@ -123,6 +112,19 @@ export default function TabLayout() {
               <MaterialCommunityIcons
                 size={24}
                 name={focused ? 'history' : 'history'}
+                color={color}
+              />
+            ),
+          }}
+        />
+                <Tabs.Screen
+          name="categories"
+          options={{
+            title: 'Categories',
+            tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
+              <MaterialCommunityIcons
+                size={24}
+                name={focused ? 'folder' : 'folder-outline'}
                 color={color}
               />
             ),

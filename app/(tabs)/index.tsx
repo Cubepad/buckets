@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, View, ScrollView, SafeAreaView } from "react-native";
 import { Appbar, Menu, Text, useTheme, Surface } from "react-native-paper";
+import { useRouter } from "expo-router";
 import ScoreCard from "../../components/ScoreCard";
 import GameControls from "../../components/GameControls";
 
@@ -16,6 +17,7 @@ interface LastScorer {
 
 export default function HomeScreen() {
   const theme = useTheme();
+  const router = useRouter();
 
   const [teamAScore, setTeamAScore] = useState<number>(0);
   const [teamBScore, setTeamBScore] = useState<number>(0);
@@ -82,15 +84,26 @@ export default function HomeScreen() {
           visible={visible}
           onDismiss={closeMenu}
           anchor={<Appbar.Action icon="dots-vertical" onPress={openMenu} />}
+          contentStyle={styles.appBarMenu}
         >
-          <Menu.Item onPress={closeMenu} title="Settings" leadingIcon="cog" />
+          <Menu.Item
+            title="Settings"
+            leadingIcon="cog"
+            onPress={() => {
+              closeMenu();
+              router.push("/settings");
+            }}
+          />
           <Menu.Item
             onPress={closeMenu}
             title="Change Team Name"
             leadingIcon="rename-box"
           />
           <Menu.Item
-            onPress={closeMenu}
+            onPress={() => {
+              closeMenu();
+              router.push("/settings/about");
+            }}
             title="About"
             leadingIcon="information"
           />
@@ -126,7 +139,7 @@ export default function HomeScreen() {
                 <Text
                   style={{
                     color: theme.colors.primary,
-                    fontFamily: "SpaceGrotesk_600SemiBold",
+                    fontFamily: "SpaceGrotesk_700Bold",
                   }}
                 >
                   +{lastScorer.points}
@@ -156,6 +169,9 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
     paddingVertical: 16,
     paddingHorizontal: 8,
     marginHorizontal: 4,
@@ -169,11 +185,14 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 10,
     alignSelf: "center",
-    borderRadius: 12,
+    borderRadius: 16,
   },
   lastScorerText: {
     fontSize: 18,
     marginBottom: 4,
     fontFamily: "SpaceGrotesk_500Medium",
+  },
+  appBarMenu: {
+    borderRadius: 12,
   },
 });
