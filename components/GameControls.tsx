@@ -104,12 +104,13 @@ const GameControls: React.FC<GameControlsProps> = ({ onUndo, onNewGame, disableU
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 16,
+    marginVertical: 16,
     alignItems: "center",
     justifyContent: "center",
   },
   timerButton: {
     marginBottom: 12,
+    borderRadius: 16,
   },
   timerContent: {
     flexDirection: "row",
@@ -123,6 +124,7 @@ const styles = StyleSheet.create({
   controlButton: {
     flex: 1,
     marginHorizontal: 8,
+    borderRadius: 16,
   },
 });
 

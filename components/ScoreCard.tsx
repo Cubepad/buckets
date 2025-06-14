@@ -227,14 +227,14 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
+    borderRadius: 20,
     minHeight: 380, // Slightly increased minHeight for better spacing
   },
   cardContent: {
     flex: 1,
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 20,
+    paddingHorizontal: 0,
+    paddingVertical: 10,
     justifyContent: "space-between",
   },
   teamNamesContainer: {
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 15,
+    paddingTop: 15,
   },
   scoreDisplayRow: {
     flexDirection: "row",
@@ -301,6 +301,7 @@ const styles = StyleSheet.create({
   },
   scoreButton: {
     width: "100%",
+    borderRadius: 14,
   },
   buttonLabel: {
     fontSize: 16,
