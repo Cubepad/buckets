@@ -36,6 +36,10 @@ export default function CategoriesScreen() {
     useState<string>("");
   const [draftName, setDraftName] = useState("");
   const [draftDescription, setDraftDescription] = useState("");
+  const [editingCategory, setEditingCategory] = useState<GameCategory | null>(
+    null
+  );
+  const [editDialogVisible, setEditDialogVisible] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -121,6 +125,49 @@ export default function CategoriesScreen() {
     await persistCategories(nextCategories);
   };
 
+  const openEditCategory = (category: GameCategory) => {
+    setEditingCategory(category);
+    setDraftName(category.name);
+    setDraftDescription(category.description);
+    setEditDialogVisible(true);
+  };
+
+  const handleUpdateCategory = async () => {
+    if (!editingCategory) return;
+
+    const nextName = draftName.trim().slice(0, MAX_CATEGORY_NAME_LENGTH);
+    if (!nextName) return;
+
+    const nextCategories = categories.map((category) =>
+      category.id === editingCategory.id
+        ? {
+            ...category,
+            name: nextName,
+            description: draftDescription.trim() || "Custom category",
+          }
+        : category
+    );
+
+    const nextHistoryEntries = historyEntries.map((game) =>
+      game.categoryId === editingCategory.id
+        ? {
+            ...game,
+            categoryName: nextName,
+          }
+        : game
+    );
+
+    setCategories(nextCategories);
+    setHistoryEntries(nextHistoryEntries);
+    setEditDialogVisible(false);
+    setEditingCategory(null);
+    setDraftName("");
+    setDraftDescription("");
+
+    await persistCategories(nextCategories);
+    await persistSavedGames(nextHistoryEntries);
+  };
+
   return (
     <SafeAreaView
       style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
@@ -166,14 +213,23 @@ export default function CategoriesScreen() {
               descriptionStyle={styles.categoryDescription}
               left={(props) => <List.Icon {...props} icon="tag-outline" />}
               right={() => (
-                <Button
-                  compact
-                  mode="text"
-                  textColor={theme.colors.error}
-                  onPress={() => handleDeleteCategory(category)}
-                >
-                  Delete
-                </Button>
+                <View style={styles.rightActions}>
+                  <Button
+                    compact
+                    mode="text"
+                    onPress={() => openEditCategory(category)}
+                  >
+                    Rename
+                  </Button>
+                  <Button
+                    compact
+                    mode="text"
+                    textColor={theme.colors.error}
+                    onPress={() => handleDeleteCategory(category)}
+                  >
+                    Delete
+                  </Button>
+                </View>
               )}
             />
           </Surface>
@@ -228,6 +284,65 @@ export default function CategoriesScreen() {
           <Dialog.Actions>
             <Button onPress={() => setDialogVisible(false)}>Cancel</Button>
             <Button onPress={handleSaveCategory}>Save</Button>
+          </Dialog.Actions>
+        </Dialog>
+
+        <Dialog
+          visible={editDialogVisible}
+          onDismiss={() => {
+            setEditDialogVisible(false);
+            setEditingCategory(null);
+            setDraftName("");
+            setDraftDescription("");
+          }}
+        >
+          <Dialog.Title style={{ fontFamily: "SpaceGrotesk_500Medium" }}>
+            Edit category
+          </Dialog.Title>
+          <Dialog.Content>
+            <TextInput
+              label="Category name"
+              value={draftName}
+              onChangeText={setDraftName}
+              mode="outlined"
+              maxLength={MAX_CATEGORY_NAME_LENGTH}
+              autoCapitalize="words"
+              autoCorrect={false}
+              style={styles.textInput}
+              contentStyle={styles.textInputContent}
+            />
+            <Text
+              style={{
+                marginTop: 6,
+                textAlign: "right",
+                color: theme.colors.onSurfaceVariant,
+                fontFamily: "SpaceGrotesk_500Medium",
+              }}
+            >
+              {draftName.length}/{MAX_CATEGORY_NAME_LENGTH}
+            </Text>
+            <TextInput
+              label="Description"
+              value={draftDescription}
+              onChangeText={setDraftDescription}
+              mode="outlined"
+              style={[styles.descriptionInput, styles.textInput]}
+              contentStyle={styles.textInputContent}
+              autoCapitalize="sentences"
+            />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button
+              onPress={() => {
+                setEditDialogVisible(false);
+                setEditingCategory(null);
+                setDraftName("");
+                setDraftDescription("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onPress={handleUpdateCategory}>Save</Button>
           </Dialog.Actions>
         </Dialog>
 
@@ -343,6 +458,12 @@ const styles = StyleSheet.create({
   },
   reassignButton: {
     marginBottom: 8,
+  },
+  rightActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
   },
   emptyContainer: {
     alignItems: "center",

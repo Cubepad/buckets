@@ -8,6 +8,13 @@ import {
   useTheme,
   Snackbar,
 } from "react-native-paper";
+import {
+  DEFAULT_APP_SETTINGS,
+  loadAppSettings,
+  shouldUseSoundEffects,
+  subscribeAppSettings,
+  triggerFeedback,
+} from "../utils/appSettings";
 
 interface GameControlsProps {
   onUndo: () => void;
@@ -54,6 +61,24 @@ const GameControls: React.FC<GameControlsProps> = ({
 
   const [newGameDialogVisible, setNewGameDialogVisible] = useState(false);
   const [saveToastVisible, setSaveToastVisible] = useState(false);
+  const [settings, setSettings] = useState(DEFAULT_APP_SETTINGS);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const nextSettings = await loadAppSettings();
+      setSettings(nextSettings);
+    };
+
+    loadSettings();
+
+    const unsubscribe = subscribeAppSettings(() => {
+      loadSettings();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     if (!saveToastVisible) return;
@@ -69,7 +94,14 @@ const GameControls: React.FC<GameControlsProps> = ({
     }`;
   };
 
-  const showNewGameDialog = () => setNewGameDialogVisible(true);
+  const showNewGameDialog = () => {
+    if (!settings.confirmDestructiveActions) {
+      confirmNewGame();
+      return;
+    }
+
+    setNewGameDialogVisible(true);
+  };
   const hideNewGameDialog = () => setNewGameDialogVisible(false);
   const confirmNewGame = () => {
     onNewGame();
@@ -77,7 +109,8 @@ const GameControls: React.FC<GameControlsProps> = ({
     hideNewGameDialog();
   };
 
-  const handleSaveGame = () => {
+  const handleSaveGame = async () => {
+    await triggerFeedback("selection");
     onSaveGame({
       duration: formatTime(seconds),
       scoreA,
@@ -87,7 +120,10 @@ const GameControls: React.FC<GameControlsProps> = ({
       categoryId,
       categoryName,
     });
-    setSaveToastVisible(true);
+
+    if (settings.soundEnabled && (await shouldUseSoundEffects())) {
+      setSaveToastVisible(true);
+    }
   };
 
   return (
@@ -95,7 +131,10 @@ const GameControls: React.FC<GameControlsProps> = ({
       <Button
         mode="contained"
         icon={isRunning ? "pause" : "play"}
-        onPress={onToggleTimer}
+        onPress={async () => {
+          await triggerFeedback("selection");
+          onToggleTimer();
+        }}
         style={styles.timerButton}
         contentStyle={styles.timerContent}
         labelStyle={styles.timerLabel}
@@ -108,7 +147,10 @@ const GameControls: React.FC<GameControlsProps> = ({
           icon="undo"
           mode="outlined"
           style={styles.controlButton}
-          onPress={onUndo}
+          onPress={async () => {
+            await triggerFeedback("light");
+            onUndo();
+          }}
           disabled={disableUndo}
         >
           Undo
@@ -129,7 +171,10 @@ const GameControls: React.FC<GameControlsProps> = ({
           mode="contained"
           style={styles.newGameButton}
           labelStyle={styles.newGameLabel}
-          onPress={showNewGameDialog}
+          onPress={async () => {
+            await triggerFeedback("medium");
+            showNewGameDialog();
+          }}
         >
           New Game
         </Button>

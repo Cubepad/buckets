@@ -44,6 +44,14 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
   const theme = useTheme();
   const [menuVisible, setMenuVisible] = useState(false);
   const [logVisible, setLogVisible] = useState(false);
+  const [categoryMenuKey, setCategoryMenuKey] = useState(0);
+
+  const openCategoryMenu = () => {
+    setMenuVisible(false);
+    setCategoryMenuKey((prev) => prev + 1);
+    requestAnimationFrame(() => setMenuVisible(true));
+  };
+  const closeCategoryMenu = () => setMenuVisible(false);
 
   const formatElapsedTime = (seconds?: number) => {
     if (typeof seconds !== "number" || Number.isNaN(seconds)) {
@@ -151,8 +159,9 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
           <View style={styles.footerActions}>
             {categories.length > 0 ? (
               <Menu
+                key={categoryMenuKey}
                 visible={menuVisible}
-                onDismiss={() => setMenuVisible(false)}
+                onDismiss={closeCategoryMenu}
                 anchor={
                   <Button
                     compact
@@ -160,7 +169,11 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
                     onPress={(event) => {
                       event.stopPropagation();
                       setLogVisible(false);
-                      setMenuVisible((prev) => !prev);
+                      if (menuVisible) {
+                        closeCategoryMenu();
+                        return;
+                      }
+                      openCategoryMenu();
                     }}
                     icon="tag-outline"
                   >

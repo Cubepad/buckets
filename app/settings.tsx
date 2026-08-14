@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { useTheme, Appbar, List } from "react-native-paper";
 import { useRouter } from "expo-router";
+import * as Haptics from "expo-haptics";
 
 const settingsItems = [
   {
@@ -24,6 +25,18 @@ const settingsItems = [
   },
   {
     id: 4,
+    title: "Gameplay",
+    description: "Timer and score defaults for match flow",
+    icon: "gamepad-variant",
+  },
+  {
+    id: 5,
+    title: "Data & Reset",
+    description: "Reset history or restore default app settings",
+    icon: "database-refresh",
+  },
+  {
+    id: 6,
     title: "About",
     description: "App version and feedback",
     icon: "information-outline",
@@ -79,10 +92,13 @@ const Settings = () => {
                   </View>
                 )}
                 onPress={() => {
+                  Haptics.selectionAsync();
                   if (item.id === 1) router.push("/settings/teams");
                   else if (item.id === 2) router.push("/settings/sound");
                   else if (item.id === 3) router.push("/settings/appearance");
-                  else if (item.id === 4) router.push("/settings/about");
+                  else if (item.id === 4) router.push("/settings/game");
+                  else if (item.id === 5) router.push("/settings/data");
+                  else if (item.id === 6) router.push("/settings/about");
                 }}
                 style={{ backgroundColor: "transparent" }}
                 titleStyle={[

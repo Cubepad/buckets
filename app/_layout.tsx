@@ -3,9 +3,14 @@ import { PaperProvider, MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 import { View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import {
+  loadAppSettings,
+  subscribeAppSettings,
+  ThemeMode,
+} from "@/utils/appSettings";
 import {
   useFonts,
   SpaceGrotesk_400Regular,
@@ -13,13 +18,38 @@ import {
   SpaceGrotesk_600SemiBold,
   SpaceGrotesk_700Bold,
 } from "@expo-google-fonts/space-grotesk";
-import { ThemeProvider, DarkTheme, DefaultTheme } from "@react-navigation/native";
+import {
+  ThemeProvider,
+  DarkTheme,
+  DefaultTheme,
+  useFocusEffect,
+} from "@react-navigation/native";
 
 // Keep the splash screen visible until fonts are loaded.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [themeMode, setThemeMode] = useState<ThemeMode>("system");
+  const [themeHydrated, setThemeHydrated] = useState(false);
+
+  useEffect(() => {
+    const loadThemeMode = async () => {
+      const settings = await loadAppSettings();
+      setThemeMode(settings.themeMode);
+      setThemeHydrated(true);
+    };
+
+    loadThemeMode();
+
+    const unsubscribe = subscribeAppSettings(() => {
+      loadThemeMode();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // Load the fonts.
   const [fontsLoaded] = useFonts({
@@ -35,7 +65,7 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) return null;
+  if (!fontsLoaded || !themeHydrated) return null;
 
   // Define typography styles using the loaded fonts.
   const typography = {
@@ -242,23 +272,26 @@ export default function RootLayout() {
     fonts: { ...MD3DarkTheme.fonts, ...typography },
   };
 
-  // Select the theme based on the user's color scheme.
+  const effectiveScheme = themeMode === "system" ? colorScheme : themeMode;
+
   const paperTheme =
-    colorScheme === "dark" ? customDarkTheme : customLightTheme;
+    effectiveScheme === "dark" ? customDarkTheme : customLightTheme;
 
   return (
-      <PaperProvider theme={paperTheme}>
-        {/* This ensures the Navigation (Stack) matches your Paper Theme */}
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <View style={{ backgroundColor: paperTheme.colors.background, flex: 1 }}>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            {/* Change "auto" to match your theme specifically */}
-            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-          </View>
-        </ThemeProvider>
-      </PaperProvider>
-    );
+    <PaperProvider theme={paperTheme}>
+      <ThemeProvider
+        value={effectiveScheme === "dark" ? DarkTheme : DefaultTheme}
+      >
+        <View
+          style={{ backgroundColor: paperTheme.colors.background, flex: 1 }}
+        >
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style={effectiveScheme === "dark" ? "light" : "dark"} />
+        </View>
+      </ThemeProvider>
+    </PaperProvider>
+  );
 }

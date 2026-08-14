@@ -9,7 +9,8 @@ import {
   Dialog,
   Portal,
 } from "react-native-paper";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useSegments } from "expo-router";
 import HistoryCard from "../../components/HistoryCard";
 import {
   DEFAULT_CATEGORIES,
@@ -19,6 +20,11 @@ import {
   persistSavedGames,
   SavedGame,
 } from "../../utils/gameHistory";
+import {
+  DEFAULT_APP_SETTINGS,
+  loadAppSettings,
+  subscribeAppSettings,
+} from "../../utils/appSettings";
 
 const History = () => {
   const theme = useTheme();
@@ -27,6 +33,7 @@ const History = () => {
     useState<GameCategory[]>(DEFAULT_CATEGORIES);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [clearDialogVisible, setClearDialogVisible] = useState(false);
+  const [settings, setSettings] = useState(DEFAULT_APP_SETTINGS);
 
   const fetchHistory = useCallback(async () => {
     const savedGames = await loadSavedGames();
@@ -45,6 +52,22 @@ const History = () => {
     fetchHistory();
   }, [fetchHistory]);
 
+  useEffect(() => {
+    const loadSettings = async () => {
+      const nextSettings = await loadAppSettings();
+      setSettings(nextSettings);
+    };
+
+    loadSettings();
+    const unsubscribe = subscribeAppSettings(() => {
+      loadSettings();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   const handleDeleteGame = async (gameId: string) => {
     const nextHistory = historyData.filter((game) => game.id !== gameId);
     setHistoryData(nextHistory);
@@ -61,6 +84,15 @@ const History = () => {
 
     const refreshedHistory = await loadSavedGames();
     setHistoryData(refreshedHistory);
+  };
+
+  const handleClearHistoryPress = async () => {
+    if (!settings.confirmDestructiveActions) {
+      await handleClearHistory();
+      return;
+    }
+
+    setClearDialogVisible(true);
   };
 
   const handleCategoryChange = async (gameId: string, categoryId: string) => {
@@ -105,47 +137,49 @@ const History = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Surface
-          style={[
-            styles.filterCard,
-            { backgroundColor: theme.colors.elevation.level1 },
-          ]}
-          elevation={1}
-        >
-          <Text
+        {settings.showHistoryCategoryFilters ? (
+          <Surface
             style={[
-              styles.filterLabel,
-              { color: theme.colors.onSurfaceVariant },
+              styles.filterCard,
+              { backgroundColor: theme.colors.elevation.level1 },
             ]}
+            elevation={1}
           >
-            Filter categories
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterRow}
-          >
-            <Chip
-              selected={selectedCategory === "all"}
-              onPress={() => setSelectedCategory("all")}
-              style={styles.filterChip}
-              textStyle={styles.filterChipText}
+            <Text
+              style={[
+                styles.filterLabel,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
             >
-              All
-            </Chip>
-            {categories.map((category) => (
+              Filter categories
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filterRow}
+            >
               <Chip
-                key={category.id}
-                selected={selectedCategory === category.id}
-                onPress={() => setSelectedCategory(category.id)}
+                selected={selectedCategory === "all"}
+                onPress={() => setSelectedCategory("all")}
                 style={styles.filterChip}
                 textStyle={styles.filterChipText}
               >
-                {category.name}
+                All
               </Chip>
-            ))}
-          </ScrollView>
-        </Surface>
+              {categories.map((category) => (
+                <Chip
+                  key={category.id}
+                  selected={selectedCategory === category.id}
+                  onPress={() => setSelectedCategory(category.id)}
+                  style={styles.filterChip}
+                  textStyle={styles.filterChipText}
+                >
+                  {category.name}
+                </Chip>
+              ))}
+            </ScrollView>
+          </Surface>
+        ) : null}
 
         <View style={styles.historyList}>
           {filteredHistory.length === 0 ? (
@@ -183,7 +217,7 @@ const History = () => {
 
         <Button
           mode="contained"
-          onPress={() => setClearDialogVisible(true)}
+          onPress={handleClearHistoryPress}
           style={styles.clearButton}
           disabled={historyData.length === 0}
         >

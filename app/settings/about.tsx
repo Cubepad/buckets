@@ -61,9 +61,9 @@ const About = () => {
         <Surface style={styles.contactItem} elevation={1}>
           <List.Item
             title="Website"
-            description="davidolaniyan.pages.dev"
+            description="davidolaniyan.com"
             left={(props) => <List.Icon {...props} icon="web" />}
-            onPress={() => openLink("https://davidolaniyan.pages.dev/")}
+            onPress={() => openLink("https://davidolaniyan.com/")}
             titleStyle={styles.label}
             descriptionStyle={[styles.value, { color: theme.colors.primary }]}
           />
@@ -83,9 +83,9 @@ const About = () => {
         <Surface style={styles.contactItem} elevation={1}>
           <List.Item
             title="Email"
-            description="davidolaniyan.dev@gmail.com"
+            description="davideniola108@gmail.com"
             left={(props) => <List.Icon {...props} icon="email" />}
-            onPress={() => openLink("mailto:davidolaniyan.dev@gmail.com")}
+            onPress={() => openLink("mailto:davideniola108@gmail.com")}
             titleStyle={styles.label}
             descriptionStyle={[styles.value, { color: theme.colors.primary }]}
           />

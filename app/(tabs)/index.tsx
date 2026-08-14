@@ -5,6 +5,11 @@ import { useRouter } from "expo-router";
 import ScoreCard from "../../components/ScoreCard";
 import GameControls from "../../components/GameControls";
 import {
+  DEFAULT_APP_SETTINGS,
+  loadAppSettings,
+  subscribeAppSettings,
+} from "../../utils/appSettings";
+import {
   createSavedGame,
   DEFAULT_CATEGORIES,
   GameCategory,
@@ -30,8 +35,12 @@ export default function HomeScreen() {
   const theme = useTheme();
   const router = useRouter();
 
-  const [teamAName, setTeamAName] = useState<string>("Team A");
-  const [teamBName, setTeamBName] = useState<string>("Team B");
+  const [teamAName, setTeamAName] = useState<string>(
+    DEFAULT_APP_SETTINGS.teamAName
+  );
+  const [teamBName, setTeamBName] = useState<string>(
+    DEFAULT_APP_SETTINGS.teamBName
+  );
   const [teamAScore, setTeamAScore] = useState<number>(0);
   const [teamBScore, setTeamBScore] = useState<number>(0);
   const [scoreHistory, setScoreHistory] = useState<ScoreHistory[]>([
@@ -40,6 +49,7 @@ export default function HomeScreen() {
   const [savedGames, setSavedGames] = useState<SavedGame[]>([]);
   const [scoreLog, setScoreLog] = useState<ScoreLogEntry[]>([]);
   const [lastScorer, setLastScorer] = useState<LastScorer | null>(null);
+  const [settings, setSettings] = useState(DEFAULT_APP_SETTINGS);
   const [gameCategories, setGameCategories] =
     useState<GameCategory[]>(DEFAULT_CATEGORIES);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
@@ -50,16 +60,36 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const loadHistory = async () => {
-      const games = await loadSavedGames();
-      const categories = await loadCategories();
+      const [games, categories, nextSettings] = await Promise.all([
+        loadSavedGames(),
+        loadCategories(),
+        loadAppSettings(),
+      ]);
+
+      setSettings(nextSettings);
       setSavedGames(games);
       setGameCategories(categories);
-      if (categories.length > 0) {
-        setSelectedCategoryId(categories[0].id);
-      }
+      setTeamAName(nextSettings.teamAName);
+      setTeamBName(nextSettings.teamBName);
+
+      setSelectedCategoryId((currentCategoryId) => {
+        if (categories.some((category) => category.id === currentCategoryId)) {
+          return currentCategoryId;
+        }
+
+        return categories[0]?.id ?? DEFAULT_CATEGORIES[0].id;
+      });
     };
 
     loadHistory();
+
+    const unsubscribe = subscribeAppSettings(() => {
+      loadHistory();
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -73,7 +103,12 @@ export default function HomeScreen() {
   }, [isTimerRunning]);
 
   const [visible, setVisible] = useState(false);
-  const openMenu = () => setVisible(true);
+  const [menuKey, setMenuKey] = useState(0);
+  const openMenu = () => {
+    setVisible(false);
+    setMenuKey((prev) => prev + 1);
+    requestAnimationFrame(() => setVisible(true));
+  };
   const closeMenu = () => setVisible(false);
 
   const resetTimer = () => {
@@ -104,7 +139,9 @@ export default function HomeScreen() {
   };
 
   const updateScore = (team: "A" | "B", points: number): void => {
-    startTimer();
+    if (settings.autoStartTimerOnScore) {
+      startTimer();
+    }
     const nextTeamAScore = team === "A" ? teamAScore + points : teamAScore;
     const nextTeamBScore = team === "B" ? teamBScore + points : teamBScore;
 
@@ -201,9 +238,21 @@ export default function HomeScreen() {
           title="Buckets Scoreboard"
         />
         <Menu
+          key={menuKey}
           visible={visible}
           onDismiss={closeMenu}
-          anchor={<Appbar.Action icon="dots-vertical" onPress={openMenu} />}
+          anchor={
+            <Appbar.Action
+              icon="dots-vertical"
+              onPress={() => {
+                if (visible) {
+                  closeMenu();
+                  return;
+                }
+                openMenu();
+              }}
+            />
+          }
           contentStyle={styles.appBarMenu}
         >
           <Menu.Item
@@ -213,11 +262,6 @@ export default function HomeScreen() {
               closeMenu();
               router.push("/settings");
             }}
-          />
-          <Menu.Item
-            onPress={closeMenu}
-            title="Change Team Name"
-            leadingIcon="rename-box"
           />
           <Menu.Item
             onPress={() => {
@@ -233,6 +277,7 @@ export default function HomeScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         alwaysBounceVertical={false}
+        contentInsetAdjustmentBehavior="automatic"
       >
         <View style={styles.scoreCardContainer}>
           <ScoreCard
@@ -240,51 +285,57 @@ export default function HomeScreen() {
             scoreB={teamBScore}
             teamAName={teamAName}
             teamBName={teamBName}
+            showEditHints={settings.showEditHints}
+            showProgress={settings.showScoreProgress}
             onTeamNameChange={handleTeamNameChange}
             updateScore={updateScore}
             onGameActivity={startTimer}
           />
         </View>
 
-        <Text
-          variant="titleMedium"
-          style={{
-            marginLeft: 16,
-            marginBottom: 8,
-            marginTop: 16,
-            fontFamily: "SpaceGrotesk_700Bold",
-            color: theme.colors.onBackground,
-          }}
-        >
-          Game Log:
-        </Text>
+        {settings.showLastScorerSummary ? (
+          <>
+            <Text
+              variant="titleMedium"
+              style={{
+                marginLeft: 16,
+                marginBottom: 8,
+                marginTop: 16,
+                fontFamily: "SpaceGrotesk_700Bold",
+                color: theme.colors.onBackground,
+              }}
+            >
+              Game Log:
+            </Text>
 
-        <Surface
-          style={[
-            styles.infoContainer,
-            { backgroundColor: theme.colors.elevation.level1 },
-          ]}
-          elevation={1}
-        >
-          <Text style={styles.lastScorerText}>
-            {lastScorer ? (
-              <>
-                Last Scorer: Team {lastScorer.team} scored (
-                <Text
-                  style={{
-                    color: theme.colors.primary,
-                    fontFamily: "SpaceGrotesk_700Bold",
-                  }}
-                >
-                  +{lastScorer.points}
-                </Text>
-                )
-              </>
-            ) : (
-              "No score yet"
-            )}
-          </Text>
-        </Surface>
+            <Surface
+              style={[
+                styles.infoContainer,
+                { backgroundColor: theme.colors.elevation.level1 },
+              ]}
+              elevation={1}
+            >
+              <Text style={styles.lastScorerText}>
+                {lastScorer ? (
+                  <>
+                    Last Scorer: Team {lastScorer.team} scored (
+                    <Text
+                      style={{
+                        color: theme.colors.primary,
+                        fontFamily: "SpaceGrotesk_700Bold",
+                      }}
+                    >
+                      +{lastScorer.points}
+                    </Text>
+                    )
+                  </>
+                ) : (
+                  "No score yet"
+                )}
+              </Text>
+            </Surface>
+          </>
+        ) : null}
 
         <GameControls
           onUndo={undoLastAction}
@@ -316,7 +367,8 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    paddingVertical: 16,
+    paddingTop: 16,
+    paddingBottom: 120,
     paddingHorizontal: 8,
     marginHorizontal: 4,
   },

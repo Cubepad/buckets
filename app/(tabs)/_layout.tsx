@@ -27,7 +27,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             <View style={styles.iconContainer}>
               {options.tabBarIcon({
                 color: focused
-                  ? theme.colors.primary
+                  ? theme.colors.onPrimaryContainer
                   : theme.colors.onSurfaceVariant,
                 size: 24,
                 focused,
@@ -46,7 +46,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               styles.labelText,
               {
                 color: focused
-                  ? theme.colors.primary
+                  ? theme.colors.onPrimaryContainer
                   : theme.colors.onSurfaceVariant,
               },
             ]}
@@ -56,24 +56,25 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         );
       }}
       shifting={false}
-      style={[
-        styles.bottomNavigation,
-        { backgroundColor: theme.colors.elevation.level2 },
-      ]}
+      compact={true}
+      activeIndicatorStyle={{
+        backgroundColor: theme.colors.primaryContainer,
+        borderRadius: 18,
+        marginHorizontal: 8,
+        marginVertical: 8,
+      }}
     />
   );
 }
 
 export default function TabLayout() {
-  const theme = useTheme();
-
   return (
     <>
       <Tabs
         screenOptions={{
           headerShown: false,
+          animation: "none",
         }}
-        // Use our custom tab bar
         tabBar={(props: BottomTabBarProps) => <CustomTabBar {...props} />}
       >
         <Tabs.Screen
@@ -141,7 +142,8 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   bottomNavigation: {
     borderTopWidth: 0,
-    elevation: 0,
+    paddingHorizontal: 6,
+    backgroundColor: "transparent",
   },
   iconContainer: {
     alignItems: "center",

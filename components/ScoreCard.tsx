@@ -12,12 +12,15 @@ import {
   TextInput,
 } from "react-native-paper";
 import { MAX_TEAM_NAME_LENGTH } from "../utils/gameHistory";
+import { triggerFeedback } from "../utils/appSettings";
 
 interface ScoreCardProps {
   scoreA: number;
   scoreB: number;
   teamAName: string;
   teamBName: string;
+  showEditHints?: boolean;
+  showProgress?: boolean;
   onTeamNameChange: (team: "A" | "B", value: string) => void;
   updateScore: (team: "A" | "B", points: number) => void;
   onGameActivity: () => void;
@@ -29,6 +32,8 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
   scoreB,
   teamAName,
   teamBName,
+  showEditHints = true,
+  showProgress = true,
   onTeamNameChange,
   updateScore,
   onGameActivity,
@@ -111,8 +116,9 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
         : scoreB / totalPoints
       : 0.5;
 
-  const openRenameDialog = (team: "A" | "B") => {
+  const openRenameDialog = async (team: "A" | "B") => {
     onGameActivity();
+    await triggerFeedback("selection");
     setEditingTeam(team);
     setDraftName(team === "A" ? teamAName : teamBName);
     setRenameDialogOpen(true);
@@ -125,8 +131,9 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
     setRenameDialogOpen(false);
   };
 
-  const scoreButtonPress = (team: "A" | "B", points: number) => {
+  const scoreButtonPress = async (team: "A" | "B", points: number) => {
     onGameActivity();
+    await triggerFeedback(points >= 3 ? "heavy" : "medium");
     updateScore(team, points);
   };
 
@@ -160,9 +167,11 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             >
               {teamAName}
             </Text>
-            <Chip compact mode="outlined" style={styles.editChip}>
-              Edit
-            </Chip>
+            {showEditHints ? (
+              <Chip compact mode="outlined" style={styles.editChip}>
+                Edit
+              </Chip>
+            ) : null}
           </Pressable>
 
           <Pressable
@@ -181,9 +190,11 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             >
               {teamBName}
             </Text>
-            <Chip compact mode="outlined" style={styles.editChip}>
-              Edit
-            </Chip>
+            {showEditHints ? (
+              <Chip compact mode="outlined" style={styles.editChip}>
+                Edit
+              </Chip>
+            ) : null}
           </Pressable>
         </View>
 
@@ -221,23 +232,25 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
           </View>
         </View>
 
-        <View style={styles.progressContainer}>
-          <ProgressBar
-            progress={progressValue}
-            color={theme.colors.primary}
-            style={[
-              styles.progressBar,
-              scoreA < scoreB && { transform: [{ scaleX: -1 }] },
-            ]}
-            fillStyle={{ borderRadius: 6 }}
-          />
-        </View>
+        {showProgress ? (
+          <View style={styles.progressContainer}>
+            <ProgressBar
+              progress={progressValue}
+              color={theme.colors.primary}
+              style={[
+                styles.progressBar,
+                scoreA < scoreB && { transform: [{ scaleX: -1 }] },
+              ]}
+              fillStyle={{ borderRadius: 6 }}
+            />
+          </View>
+        ) : null}
 
         <View style={styles.buttonArea}>
           <View style={styles.teamButtonColumn}>
             <Button
               mode="contained-tonal"
-              onPress={() => scoreButtonPress("A", 1)}
+              onPress={() => void scoreButtonPress("A", 1)}
               style={styles.scoreButton}
               labelStyle={styles.buttonLabel}
             >
@@ -245,7 +258,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             </Button>
             <Button
               mode="contained-tonal"
-              onPress={() => scoreButtonPress("A", 2)}
+              onPress={() => void scoreButtonPress("A", 2)}
               style={styles.scoreButton}
               labelStyle={styles.buttonLabel}
             >
@@ -253,7 +266,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             </Button>
             <Button
               mode="contained-tonal"
-              onPress={() => scoreButtonPress("A", 3)}
+              onPress={() => void scoreButtonPress("A", 3)}
               style={styles.scoreButton}
               labelStyle={styles.buttonLabel}
             >
@@ -264,7 +277,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
           <View style={styles.teamButtonColumn}>
             <Button
               mode="contained-tonal"
-              onPress={() => scoreButtonPress("B", 1)}
+              onPress={() => void scoreButtonPress("B", 1)}
               style={styles.scoreButton}
               labelStyle={styles.buttonLabel}
             >
@@ -272,7 +285,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             </Button>
             <Button
               mode="contained-tonal"
-              onPress={() => scoreButtonPress("B", 2)}
+              onPress={() => void scoreButtonPress("B", 2)}
               style={styles.scoreButton}
               labelStyle={styles.buttonLabel}
             >
@@ -280,7 +293,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             </Button>
             <Button
               mode="contained-tonal"
-              onPress={() => scoreButtonPress("B", 3)}
+              onPress={() => void scoreButtonPress("B", 3)}
               style={styles.scoreButton}
               labelStyle={styles.buttonLabel}
             >
@@ -345,7 +358,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     width: "115%",
-    marginBottom: 8,
+    marginBottom: 0,
     paddingHorizontal: 10,
   },
   teamBlock: {
@@ -354,6 +367,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 8,
     paddingHorizontal: 6,
+  },
+  compactTeamBlock: {
+    paddingVertical: 4,
+  },
+  compactCard: {
+    minHeight: 280,
+  },
+  compactCardContent: {
+    paddingVertical: 6,
   },
   teamNameText: {
     fontSize: 22,
@@ -367,7 +389,10 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 15,
+    paddingTop: 0,
+  },
+  compactScoreContainer: {
+    marginTop: 4,
   },
   scoreDisplayRow: {
     flexDirection: "row",
