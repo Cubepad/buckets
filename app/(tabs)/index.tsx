@@ -111,7 +111,7 @@ export default function HomeScreen() {
       </Appbar.Header>
 
       {/* Use ScrollView to ensure content fits, especially buttons */}
-      <ScrollView
+<ScrollView
         contentContainerStyle={styles.scrollContainer}
         alwaysBounceVertical={false}
       >
@@ -123,6 +123,20 @@ export default function HomeScreen() {
             updateScore={updateScore}
           />
         </View>
+
+        {/* Added Game Log Header */}
+        <Text 
+          variant="titleMedium" 
+          style={{ 
+            marginLeft: 16, 
+            marginBottom: 8, 
+            marginTop: 16,
+            fontFamily: "SpaceGrotesk_700Bold",
+            color: theme.colors.onBackground 
+          }}
+        >
+          Game Log:
+        </Text>
 
         {/* Container for displaying the last scorer information */}
         <Surface
@@ -177,7 +191,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   scoreCardContainer: {
-    marginBottom: 24,
+    marginBottom: 8,
   },
   infoContainer: {
     marginBottom: 12,

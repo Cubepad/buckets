@@ -1,13 +1,10 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
-import { Button, useTheme, Appbar, Menu } from "react-native-paper";
+import { StyleSheet, View, ScrollView } from "react-native"; // Added ScrollView
+import { Button, useTheme, Appbar } from "react-native-paper";
 import HistoryCard from "../../components/HistoryCard";
 
 const History = () => {
   const theme = useTheme();
-  const [visible, setVisible] = React.useState(false);
-  const openMenu = () => setVisible(true);
-  const closeMenu = () => setVisible(false);
 
   // Example history data
   const historyData = [
@@ -17,6 +14,7 @@ const History = () => {
       score1: 21,
       score2: 32,
       date: "June 10, 2025",
+      duration: "42:15",
     },
     {
       team1: "Team C",
@@ -24,6 +22,7 @@ const History = () => {
       score1: 15,
       score2: 21,
       date: "June 9, 2025",
+      duration: "38:40",
     },
     {
       team1: "Team E",
@@ -31,6 +30,16 @@ const History = () => {
       score1: 21,
       score2: 19,
       date: "June 8, 2025",
+      duration: "45:00",
+    },
+    // Adding more for scroll testing
+    {
+      team1: "Team G",
+      team2: "Team H",
+      score1: 11,
+      score2: 21,
+      date: "June 7, 2025",
+      duration: "30:20",
     },
   ];
 
@@ -38,29 +47,45 @@ const History = () => {
     <View style={{ flex: 1, backgroundColor: theme.colors.surface }}>
       <Appbar.Header>
         <Appbar.Content
-          titleStyle={{ fontFamily: "SpaceGrotesk_600SemiBold", fontSize: 24, letterSpacing: -1, }}
+          titleStyle={{
+            fontFamily: "SpaceGrotesk_600SemiBold",
+            fontSize: 24,
+            letterSpacing: -1,
+          }}
           title="History"
         />
       </Appbar.Header>
 
-      {/* History cards */}
-      <View style={styles.historyList}>
-        {historyData.map((item, index) => (
-          <HistoryCard
-            key={index}
-            team1={item.team1}
-            team2={item.team2}
-            score1={item.score1}
-            score2={item.score2}
-            date={item.date}
-          />
-        ))}
-      </View>
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* History cards */}
+        <View style={styles.historyList}>
+          {historyData.map((item, index) => (
+            <HistoryCard
+              key={index}
+              team1={item.team1}
+              team2={item.team2}
+              score1={item.score1}
+              score2={item.score2}
+              date={item.date}
+              duration={item.duration}
+            />
+          ))}
+        </View>
 
-      {/* Clear History Button */}
-      <Button mode="contained" onPress={() => {}} style={styles.clearButton}>
-        Clear History
-      </Button>
+        {/* Clear History Button moved inside ScrollView so it's at the end of the list */}
+        <Button 
+          mode="contained" 
+          onPress={() => {}} 
+          style={styles.clearButton}
+          contentStyle={{ paddingVertical: 6 }}
+        >
+          Clear History
+        </Button>
+      </ScrollView>
     </View>
   );
 };
@@ -68,24 +93,18 @@ const History = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
+  scrollContent: {
+    paddingBottom: 32, // Extra space at the bottom for breathing room
   },
   historyList: {
     marginTop: 16,
     paddingHorizontal: 16,
   },
   clearButton: {
-    marginTop: 20,
+    marginTop: 8,
     marginHorizontal: 16,
-    alignSelf: "center",
-  },
-  appBarMenu: {
-    borderRadius: 12,
+    marginBottom: 20, // Bottom margin to prevent button from hugging the screen edge
   },
 });
 

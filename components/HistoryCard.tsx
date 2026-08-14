@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, View, Text } from "react-native";
-import { useTheme } from "react-native-paper";
+import { useTheme, Surface } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 type HistoryCardProps = {
   team1: string;
@@ -8,6 +9,7 @@ type HistoryCardProps = {
   score1: number;
   score2: number;
   date: string;
+  duration?: string;
 };
 
 const HistoryCard: React.FC<HistoryCardProps> = ({
@@ -16,116 +18,126 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
   score1,
   score2,
   date,
+  duration = "40:00",
 }) => {
   const theme = useTheme();
-  const winner = score1 > score2 ? team1 : team2;
 
   return (
-    <View
+    <Surface
       style={[
         styles.card,
         { backgroundColor: theme.colors.elevation.level1 },
       ]}
+      elevation={1}
     >
-      {/* Teams row */}
-      <View style={styles.teamsRow}>
-        <Text style={[styles.teamText, { color: theme.colors.onSurface }]}>
-          {team1}
-        </Text>
-        <Text style={[styles.vsText, { color: theme.colors.onSurfaceVariant }]}>
-          vs
-        </Text>
-        <Text style={[styles.teamText, { color: theme.colors.onSurface }]}>
-          {team2}
+      {/* Header: Date moved to the left */}
+      <View style={styles.header}>
+        <Text style={[styles.dateText, { color: theme.colors.onSurfaceVariant }]}>
+          {date}
         </Text>
       </View>
 
-      {/* Scores row */}
-      <View style={styles.scoresRow}>
-        <Text style={[styles.scoreText, { color: theme.colors.onSurface }]}>
-          {score1}
-        </Text>
-        <Text style={[styles.dashText, { color: theme.colors.onSurfaceVariant }]}>
-          -
-        </Text>
-        <Text style={[styles.scoreText, { color: theme.colors.onSurface }]}>
-          {score2}
-        </Text>
+      {/* Main Content: Scoreboard */}
+      <View style={styles.mainContent}>
+        <View style={styles.teamContainer}>
+          <View style={[styles.iconCircle, { backgroundColor: theme.colors.surfaceVariant }]}>
+            <MaterialCommunityIcons name="shield" size={32} color={theme.colors.onSurfaceVariant} />
+          </View>
+          <Text numberOfLines={1} style={[styles.teamName, { color: theme.colors.onSurface }]}>
+            {team1}
+          </Text>
+        </View>
+
+        <View style={styles.scoreContainer}>
+          <Text style={[styles.scoreText, { color: theme.colors.onSurface }]}>
+            {score1} — {score2}
+          </Text>
+        </View>
+
+        <View style={styles.teamContainer}>
+          <View style={[styles.iconCircle, { backgroundColor: theme.colors.primaryContainer }]}>
+            <MaterialCommunityIcons name="shield" size={32} color={theme.colors.primary} />
+          </View>
+          <Text numberOfLines={1} style={[styles.teamName, { color: theme.colors.primary }]}>
+            {team2}
+          </Text>
+        </View>
       </View>
 
-      {/* Winner */}
-      <Text style={[styles.winnerText, { color: theme.colors.primary }]}>
-        Winner: {winner}
-      </Text>
-
-      {/* Date */}
-      <Text style={[styles.dateText, { color: theme.colors.onSurfaceVariant }]}>
-        {date}
-      </Text>
-    </View>
+      {/* Footer: Duration */}
+      <View style={styles.footer}>
+        <View style={styles.durationContainer}>
+          <MaterialCommunityIcons name="clock-outline" size={16} color={theme.colors.onSurfaceVariant} />
+          <Text style={[styles.durationText, { color: theme.colors.onSurfaceVariant }]}>
+            Duration: {duration}
+          </Text>
+        </View>
+      </View>
+    </Surface>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
     padding: 16,
-    borderRadius: 20, // Updated to 20px
+    borderRadius: 16,
     marginBottom: 16,
-    borderWidth: 0,
-    elevation: 1,
-    alignItems: "center",
-    justifyContent: "center",
   },
-  teamsRow: {
+  header: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8, 
-    marginBottom: 8,
-    width: "100%",
-  },
-  teamText: {
-    fontFamily: "SpaceGrotesk_600SemiBold",
-    fontSize: 16,
-    fontWeight: "600", 
-    textAlign: "center",
-    flex: 1,
-    maxWidth: "40%", 
-  },
-  vsText: {
-    fontFamily: "SpaceGrotesk_400Regular",
-    fontSize: 14,
-    textAlign: "center",
-  },
-  scoresRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-    width: "100%",
-  },
-  scoreText: {
-    fontFamily: "SpaceGrotesk_600SemiBold",
-    fontSize: 24,
-    marginHorizontal: 8,
-    fontWeight: "600",
-  },
-  dashText: {
-    fontFamily: "SpaceGrotesk_400Regular",
-    fontSize: 24,
-    marginHorizontal: 58,
-  },
-  winnerText: {
-    fontFamily: "SpaceGrotesk_600SemiBold",
-    fontSize: 15,
-    marginBottom: 4,
-    textAlign: "center",
-    fontWeight: "600",
+    justifyContent: "flex-start", // Changed from flex-end to flex-start
+    marginBottom: 12,
   },
   dateText: {
     fontFamily: "SpaceGrotesk_400Regular",
+    fontSize: 12,
+    paddingLeft: 4, // Aligns slightly better with the icons below
+  },
+  mainContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  teamContainer: {
+    alignItems: "center",
+    flex: 1,
+  },
+  iconCircle: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  teamName: {
+    fontFamily: "SpaceGrotesk_700Bold",
     fontSize: 14,
-    textAlign: "center",
+  },
+  scoreContainer: {
+    flex: 1.2,
+    alignItems: "center",
+  },
+  scoreText: {
+    fontFamily: "SpaceGrotesk_700Bold",
+    fontSize: 28,
+  },
+  footer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.05)",
+    paddingTop: 10,
+  },
+  durationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  durationText: {
+    fontFamily: "SpaceGrotesk_400Regular",
+    fontSize: 12,
   },
 });
 

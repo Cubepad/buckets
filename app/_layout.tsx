@@ -13,6 +13,7 @@ import {
   SpaceGrotesk_600SemiBold,
   SpaceGrotesk_700Bold,
 } from "@expo-google-fonts/space-grotesk";
+import { ThemeProvider, DarkTheme, DefaultTheme } from "@react-navigation/native";
 
 // Keep the splash screen visible until fonts are loaded.
 SplashScreen.preventAutoHideAsync();
@@ -246,18 +247,18 @@ export default function RootLayout() {
     colorScheme === "dark" ? customDarkTheme : customLightTheme;
 
   return (
-    <PaperProvider theme={paperTheme}>
-      <View style={{ backgroundColor: paperTheme.colors.background, flex: 1 }}>
-        <Stack
-          screenOptions={{
-            headerShown: false, 
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </View>
-    </PaperProvider>
-  );
+      <PaperProvider theme={paperTheme}>
+        {/* This ensures the Navigation (Stack) matches your Paper Theme */}
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <View style={{ backgroundColor: paperTheme.colors.background, flex: 1 }}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            {/* Change "auto" to match your theme specifically */}
+            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+          </View>
+        </ThemeProvider>
+      </PaperProvider>
+    );
 }
