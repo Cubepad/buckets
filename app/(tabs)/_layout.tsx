@@ -1,29 +1,10 @@
-import { StyleSheet, View } from 'react-native';
-import { Tabs } from 'expo-router';
-import { BottomNavigation, Text, useTheme } from 'react-native-paper';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { StyleSheet, View } from "react-native";
+import { Tabs } from "expo-router";
+import { BottomNavigation, Text, useTheme } from "react-native-paper";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
-// Define our own minimal types for the tab bar props
-interface CustomTabBarProps {
-  state: {
-    index: number;
-    routes: { key: string; name: string }[];
-  };
-  descriptors: Record<string, any>;
-  navigation: {
-    navigate: (name: string) => void;
-    emit: (event: {
-      type: string;
-      target: string;
-      canPreventDefault?: boolean;
-    }) => { defaultPrevented: boolean };
-  };
-}
-
-function CustomTabBar({ state, descriptors, navigation }: CustomTabBarProps) {
+function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const theme = useTheme();
 
   return (
@@ -31,7 +12,7 @@ function CustomTabBar({ state, descriptors, navigation }: CustomTabBarProps) {
       navigationState={state}
       onTabPress={({ route }) => {
         const event = navigation.emit({
-          type: 'tabPress',
+          type: "tabPress",
           target: route.key,
           canPreventDefault: true,
         });
@@ -45,7 +26,9 @@ function CustomTabBar({ state, descriptors, navigation }: CustomTabBarProps) {
           return (
             <View style={styles.iconContainer}>
               {options.tabBarIcon({
-                color: focused ? theme.colors.primary : theme.colors.onSurfaceVariant,
+                color: focused
+                  ? theme.colors.primary
+                  : theme.colors.onSurfaceVariant,
                 size: 24,
                 focused,
               })}
@@ -62,7 +45,9 @@ function CustomTabBar({ state, descriptors, navigation }: CustomTabBarProps) {
             style={[
               styles.labelText,
               {
-                color: focused ? theme.colors.primary : theme.colors.onSurfaceVariant,
+                color: focused
+                  ? theme.colors.primary
+                  : theme.colors.onSurfaceVariant,
               },
             ]}
           >
@@ -89,16 +74,22 @@ export default function TabLayout() {
           headerShown: false,
         }}
         // Use our custom tab bar
-        tabBar={(props: CustomTabBarProps) => <CustomTabBar {...props} />}
+        tabBar={(props: BottomTabBarProps) => <CustomTabBar {...props} />}
       >
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Scoreboard',
-            tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
+            title: "Scoreboard",
+            tabBarIcon: ({
+              color,
+              focused,
+            }: {
+              color: string;
+              focused: boolean;
+            }) => (
               <MaterialCommunityIcons
                 size={24}
-                name={focused ? 'scoreboard' : 'scoreboard-outline'}
+                name={focused ? "scoreboard" : "scoreboard-outline"}
                 color={color}
               />
             ),
@@ -107,24 +98,36 @@ export default function TabLayout() {
         <Tabs.Screen
           name="history"
           options={{
-            title: 'History',
-            tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
+            title: "History",
+            tabBarIcon: ({
+              color,
+              focused,
+            }: {
+              color: string;
+              focused: boolean;
+            }) => (
               <MaterialCommunityIcons
                 size={24}
-                name={focused ? 'history' : 'history'}
+                name={focused ? "history" : "history"}
                 color={color}
               />
             ),
           }}
         />
-                <Tabs.Screen
+        <Tabs.Screen
           name="categories"
           options={{
-            title: 'Categories',
-            tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
+            title: "Categories",
+            tabBarIcon: ({
+              color,
+              focused,
+            }: {
+              color: string;
+              focused: boolean;
+            }) => (
               <MaterialCommunityIcons
                 size={24}
-                name={focused ? 'folder' : 'folder-outline'}
+                name={focused ? "folder" : "folder-outline"}
                 color={color}
               />
             ),
@@ -141,12 +144,12 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   labelText: {
     fontSize: 12,
-    textAlign: 'center',
-    fontFamily: 'SpaceGrotesk_500Medium',
+    textAlign: "center",
+    fontFamily: "SpaceGrotesk_500Medium",
   },
 });

@@ -30,7 +30,6 @@ const settingsItems = [
   },
 ];
 
-
 const Settings = () => {
   const theme = useTheme();
   const router = useRouter();
@@ -80,9 +79,9 @@ const Settings = () => {
                   </View>
                 )}
                 onPress={() => {
-                  if (item.id === 1) router.push("/settings/notifications");
-                  else if (item.id === 2) router.push("/settings/account");
-                  else if (item.id === 3) router.push("/settings/privacy");
+                  if (item.id === 1) router.push("/settings/teams");
+                  else if (item.id === 2) router.push("/settings/sound");
+                  else if (item.id === 3) router.push("/settings/appearance");
                   else if (item.id === 4) router.push("/settings/about");
                 }}
                 style={{ backgroundColor: "transparent" }}
@@ -131,7 +130,7 @@ const styles = StyleSheet.create({
   iconWrapper: {
     justifyContent: "center",
     alignItems: "center",
-    alignSelf: "center", 
+    alignSelf: "center",
   },
 });
 

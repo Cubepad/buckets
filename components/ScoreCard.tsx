@@ -1,34 +1,58 @@
-import { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, Animated, Easing } from "react-native";
-import { Button, Text, Card, useTheme, ProgressBar } from "react-native-paper";
+import React, { useState, useEffect, useRef } from "react";
+import { StyleSheet, View, Animated, Easing, Pressable } from "react-native";
+import {
+  Button,
+  Text,
+  Card,
+  useTheme,
+  ProgressBar,
+  Dialog,
+  Portal,
+  Chip,
+  TextInput,
+} from "react-native-paper";
+import { MAX_TEAM_NAME_LENGTH } from "../utils/gameHistory";
 
 interface ScoreCardProps {
   scoreA: number;
   scoreB: number;
+  teamAName: string;
+  teamBName: string;
+  onTeamNameChange: (team: "A" | "B", value: string) => void;
   updateScore: (team: "A" | "B", points: number) => void;
+  onGameActivity: () => void;
   style?: object;
 }
 
 const ScoreCard: React.FC<ScoreCardProps> = ({
   scoreA,
   scoreB,
+  teamAName,
+  teamBName,
+  onTeamNameChange,
   updateScore,
+  onGameActivity,
   style,
 }) => {
   const theme = useTheme();
-  // Separate animated values for each score's pop effect
   const [popValueA] = useState(new Animated.Value(0));
   const [popValueB] = useState(new Animated.Value(0));
   const [borderColor] = useState(new Animated.Value(0));
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [editingTeam, setEditingTeam] = useState<"A" | "B">("A");
+  const [draftName, setDraftName] = useState(teamAName);
   const prevScoreA = useRef(scoreA);
   const prevScoreB = useRef(scoreB);
 
-  // Reusable animation function for pop effect
+  useEffect(() => {
+    setDraftName(editingTeam === "A" ? teamAName : teamBName);
+  }, [editingTeam, teamAName, teamBName]);
+
   const animatePop = (
     valueHolder: Animated.Value,
     direction: "up" | "down"
   ) => {
-    const startValue = direction === "up" ? 30 : -30; // Start below for 'up', above for 'down'
+    const startValue = direction === "up" ? 30 : -30;
     valueHolder.setValue(startValue);
     Animated.timing(valueHolder, {
       toValue: 0,
@@ -38,7 +62,6 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
     }).start();
   };
 
-  // Border color flash animation
   const changeBorderColor = () => {
     Animated.timing(borderColor, {
       toValue: 1,
@@ -52,42 +75,60 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
         duration: 250,
         useNativeDriver: false,
       }).start();
-    }, 600); 
+    }, 600);
   };
 
-  // Effect to trigger animations on score changes
   useEffect(() => {
     let scoreChanged = false;
 
-    // Check Team A score change
     if (scoreA !== prevScoreA.current) {
       animatePop(popValueA, scoreA > prevScoreA.current ? "up" : "down");
       prevScoreA.current = scoreA;
       scoreChanged = true;
     }
 
-    // Check Team B score change
     if (scoreB !== prevScoreB.current) {
       animatePop(popValueB, scoreB > prevScoreB.current ? "up" : "down");
       prevScoreB.current = scoreB;
       scoreChanged = true;
     }
 
-    // Trigger border flash if any score changed
     if (scoreChanged) {
       changeBorderColor();
     }
-  }, [scoreA, scoreB]); // Depend on both scores
+  }, [scoreA, scoreB]);
 
   const interpolatedBorderColor = borderColor.interpolate({
     inputRange: [0, 1],
     outputRange: [theme.colors.elevation.level1, theme.colors.primary],
   });
 
-  // Compute the progress bar value and handle flip based on leading team.
   const totalPoints = scoreA + scoreB;
   const progressValue =
-    totalPoints > 0 ? (scoreA >= scoreB ? scoreA / totalPoints : scoreB / totalPoints) : 0.5;
+    totalPoints > 0
+      ? scoreA >= scoreB
+        ? scoreA / totalPoints
+        : scoreB / totalPoints
+      : 0.5;
+
+  const openRenameDialog = (team: "A" | "B") => {
+    onGameActivity();
+    setEditingTeam(team);
+    setDraftName(team === "A" ? teamAName : teamBName);
+    setRenameDialogOpen(true);
+  };
+
+  const confirmRename = () => {
+    const nextValue =
+      draftName.trim() || (editingTeam === "A" ? "Team A" : "Team B");
+    onTeamNameChange(editingTeam, nextValue);
+    setRenameDialogOpen(false);
+  };
+
+  const scoreButtonPress = (team: "A" | "B", points: number) => {
+    onGameActivity();
+    updateScore(team, points);
+  };
 
   return (
     <Card
@@ -102,20 +143,52 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
       ]}
     >
       <Card.Content style={styles.cardContent}>
-        {/* Team Names Container */}
         <View style={styles.teamNamesContainer}>
-          <Text style={[styles.teamNameText, { color: theme.colors.onSurface, fontFamily: "SpaceGrotesk_500Medium" }]}>
-            Team A
-          </Text>
-          <Text style={[styles.teamNameText, { color: theme.colors.onSurface, fontFamily: "SpaceGrotesk_500Medium" }]}>
-            Team B
-          </Text>
+          <Pressable
+            onPress={() => openRenameDialog("A")}
+            style={styles.teamBlock}
+          >
+            <Text
+              numberOfLines={1}
+              style={[
+                styles.teamNameText,
+                {
+                  color: theme.colors.onSurface,
+                  fontFamily: "SpaceGrotesk_500Medium",
+                },
+              ]}
+            >
+              {teamAName}
+            </Text>
+            <Chip compact mode="outlined" style={styles.editChip}>
+              Edit
+            </Chip>
+          </Pressable>
+
+          <Pressable
+            onPress={() => openRenameDialog("B")}
+            style={styles.teamBlock}
+          >
+            <Text
+              numberOfLines={1}
+              style={[
+                styles.teamNameText,
+                {
+                  color: theme.colors.onSurface,
+                  fontFamily: "SpaceGrotesk_500Medium",
+                },
+              ]}
+            >
+              {teamBName}
+            </Text>
+            <Chip compact mode="outlined" style={styles.editChip}>
+              Edit
+            </Chip>
+          </Pressable>
         </View>
 
-        {/* Score Display Area - Using Row Layout for Individual Animation */}
         <View style={styles.scoreContainer}>
           <View style={styles.scoreDisplayRow}>
-            {/* Animated Score A */}
             <Animated.Text
               style={[
                 styles.scoreDigit,
@@ -128,12 +201,12 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
               {scoreA}
             </Animated.Text>
 
-            {/* Separator */}
-            <Text style={[styles.scoreSeparator, { color: theme.colors.outline }]}>
+            <Text
+              style={[styles.scoreSeparator, { color: theme.colors.outline }]}
+            >
               -
             </Text>
 
-            {/* Animated Score B */}
             <Animated.Text
               style={[
                 styles.scoreDigit,
@@ -148,27 +221,23 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
           </View>
         </View>
 
-        {/* New Progress Bar added under the score display */}
         <View style={styles.progressContainer}>
           <ProgressBar
             progress={progressValue}
             color={theme.colors.primary}
             style={[
               styles.progressBar,
-              // If Team B is leading, flip the progress bar to fill from right.
               scoreA < scoreB && { transform: [{ scaleX: -1 }] },
             ]}
             fillStyle={{ borderRadius: 6 }}
           />
         </View>
 
-        {/* Button Area - Two Columns */}
         <View style={styles.buttonArea}>
-          {/* Team A Buttons */}
           <View style={styles.teamButtonColumn}>
             <Button
               mode="contained-tonal"
-              onPress={() => updateScore("A", 1)}
+              onPress={() => scoreButtonPress("A", 1)}
               style={styles.scoreButton}
               labelStyle={styles.buttonLabel}
             >
@@ -176,7 +245,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             </Button>
             <Button
               mode="contained-tonal"
-              onPress={() => updateScore("A", 2)}
+              onPress={() => scoreButtonPress("A", 2)}
               style={styles.scoreButton}
               labelStyle={styles.buttonLabel}
             >
@@ -184,7 +253,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             </Button>
             <Button
               mode="contained-tonal"
-              onPress={() => updateScore("A", 3)}
+              onPress={() => scoreButtonPress("A", 3)}
               style={styles.scoreButton}
               labelStyle={styles.buttonLabel}
             >
@@ -192,11 +261,10 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             </Button>
           </View>
 
-          {/* Team B Buttons */}
           <View style={styles.teamButtonColumn}>
             <Button
               mode="contained-tonal"
-              onPress={() => updateScore("B", 1)}
+              onPress={() => scoreButtonPress("B", 1)}
               style={styles.scoreButton}
               labelStyle={styles.buttonLabel}
             >
@@ -204,7 +272,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             </Button>
             <Button
               mode="contained-tonal"
-              onPress={() => updateScore("B", 2)}
+              onPress={() => scoreButtonPress("B", 2)}
               style={styles.scoreButton}
               labelStyle={styles.buttonLabel}
             >
@@ -212,7 +280,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
             </Button>
             <Button
               mode="contained-tonal"
-              onPress={() => updateScore("B", 3)}
+              onPress={() => scoreButtonPress("B", 3)}
               style={styles.scoreButton}
               labelStyle={styles.buttonLabel}
             >
@@ -221,6 +289,42 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
           </View>
         </View>
       </Card.Content>
+
+      <Portal>
+        <Dialog
+          visible={renameDialogOpen}
+          onDismiss={() => setRenameDialogOpen(false)}
+        >
+          <Dialog.Title style={{ fontFamily: "SpaceGrotesk_500Medium" }}>
+            Rename {editingTeam === "A" ? "Team A" : "Team B"}
+          </Dialog.Title>
+          <Dialog.Content>
+            <TextInput
+              value={draftName}
+              onChangeText={setDraftName}
+              label={editingTeam === "A" ? "Team A name" : "Team B name"}
+              maxLength={MAX_TEAM_NAME_LENGTH}
+              mode="outlined"
+              autoCapitalize="words"
+              autoCorrect={false}
+            />
+            <Text
+              style={{
+                marginTop: 8,
+                textAlign: "right",
+                color: theme.colors.onSurfaceVariant,
+                fontFamily: "SpaceGrotesk_500Medium",
+              }}
+            >
+              {draftName.length}/{MAX_TEAM_NAME_LENGTH}
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setRenameDialogOpen(false)}>Cancel</Button>
+            <Button onPress={confirmRename}>Save</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </Card>
   );
 };
@@ -228,7 +332,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     borderRadius: 20,
-    minHeight: 380, // Slightly increased minHeight for better spacing
+    minHeight: 380,
   },
   cardContent: {
     flex: 1,
@@ -244,11 +348,20 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     paddingHorizontal: 10,
   },
+  teamBlock: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+  },
   teamNameText: {
     fontSize: 22,
-    fontWeight: "600",
     textAlign: "center",
-    flex: 1,
+    maxWidth: "100%",
+  },
+  editChip: {
+    marginTop: 6,
   },
   scoreContainer: {
     width: "100%",
