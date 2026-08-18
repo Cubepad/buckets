@@ -346,6 +346,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 20,
     minHeight: 380,
+    paddingHorizontal: 10,
   },
   cardContent: {
     flex: 1,
@@ -365,8 +366,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 6,
+
   },
   compactTeamBlock: {
     paddingVertical: 4,
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
   },
   buttonArea: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     alignItems: "flex-start",
     width: "100%",
     marginTop: 25,

@@ -163,9 +163,6 @@ const GameControls: React.FC<GameControlsProps> = ({
         >
           Save
         </Button>
-      </View>
-
-      <View style={styles.bottomRow}>
         <Button
           icon="reload"
           mode="contained"
@@ -206,7 +203,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         visible={saveToastVisible}
         onDismiss={() => setSaveToastVisible(false)}
         duration={1800}
-        style={{ backgroundColor: theme.colors.primary }}
+        style={{ backgroundColor: theme.colors.primary, borderRadius: 16, }}
       >
         Game saved to history
       </Snackbar>
@@ -223,7 +220,7 @@ const styles = StyleSheet.create({
   timerButton: {
     marginBottom: 8,
     borderRadius: 16,
-    width: "95%",
+    width: "100%",
   },
   timerContent: {
     flexDirection: "row",
@@ -235,14 +232,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   topRow: {
+    display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
-    width: "95%",
+    width: "100%",
     gap: 8,
     marginBottom: 8,
-  },
-  bottomRow: {
-    width: "95%",
   },
   controlButton: {
     flex: 1,
@@ -250,8 +244,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   newGameButton: {
-    width: "100%",
     borderRadius: 16,
+    flex: 1,
   },
   newGameLabel: {
     fontFamily: "SpaceGrotesk_700Bold",

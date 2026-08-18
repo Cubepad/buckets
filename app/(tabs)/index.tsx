@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ScrollView, SafeAreaView } from "react-native";
+import { StyleSheet, View, ScrollView } from "react-native";
 import { Appbar, Menu, Text, useTheme, Surface } from "react-native-paper";
 import { useRouter } from "expo-router";
 import ScoreCard from "../../components/ScoreCard";
@@ -225,7 +225,7 @@ export default function HomeScreen() {
     gameCategories[0];
 
   return (
-    <SafeAreaView
+    <View
       style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
     >
       <Appbar.Header mode="center-aligned">
@@ -298,9 +298,9 @@ export default function HomeScreen() {
             <Text
               variant="titleMedium"
               style={{
-                marginLeft: 16,
-                marginBottom: 8,
-                marginTop: 16,
+                marginLeft: 8,
+                marginBottom: 4,
+                marginTop: 0,
                 fontFamily: "SpaceGrotesk_700Bold",
                 color: theme.colors.onBackground,
               }}
@@ -354,7 +354,7 @@ export default function HomeScreen() {
           onResetTimer={resetTimer}
         />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -367,8 +367,6 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    paddingTop: 16,
-    paddingBottom: 120,
     paddingHorizontal: 8,
     marginHorizontal: 4,
   },
@@ -376,7 +374,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   infoContainer: {
-    marginBottom: 12,
+    marginBottom: 4,
     alignItems: "center",
     width: "100%",
     paddingVertical: 10,
@@ -385,7 +383,6 @@ const styles = StyleSheet.create({
   },
   lastScorerText: {
     fontSize: 18,
-    marginBottom: 4,
     fontFamily: "SpaceGrotesk_500Medium",
   },
   appBarMenu: {

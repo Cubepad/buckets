@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ScrollView, SafeAreaView } from "react-native";
+import { StyleSheet, View, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import {
   Appbar,
   Button,
@@ -169,7 +169,7 @@ export default function CategoriesScreen() {
   };
 
   return (
-    <SafeAreaView
+    <View
       style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
     >
       <Appbar.Header>
@@ -242,170 +242,176 @@ export default function CategoriesScreen() {
       </ScrollView>
 
       <Portal>
-        <Dialog
-          visible={dialogVisible}
-          onDismiss={() => setDialogVisible(false)}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <Dialog.Title style={{ fontFamily: "SpaceGrotesk_500Medium" }}>
-            New category
-          </Dialog.Title>
-          <Dialog.Content>
-            <TextInput
-              label="Category name"
-              value={draftName}
-              onChangeText={setDraftName}
-              mode="outlined"
-              maxLength={MAX_CATEGORY_NAME_LENGTH}
-              autoCapitalize="words"
-              autoCorrect={false}
-              style={styles.textInput}
-              contentStyle={styles.textInputContent}
-            />
-            <Text
-              style={{
-                marginTop: 6,
-                textAlign: "right",
-                color: theme.colors.onSurfaceVariant,
-                fontFamily: "SpaceGrotesk_500Medium",
-              }}
-            >
-              {draftName.length}/{MAX_CATEGORY_NAME_LENGTH}
-            </Text>
-            <TextInput
-              label="Description"
-              value={draftDescription}
-              onChangeText={setDraftDescription}
-              mode="outlined"
-              style={[styles.descriptionInput, styles.textInput]}
-              contentStyle={styles.textInputContent}
-              autoCapitalize="sentences"
-            />
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setDialogVisible(false)}>Cancel</Button>
-            <Button onPress={handleSaveCategory}>Save</Button>
-          </Dialog.Actions>
-        </Dialog>
+          <Dialog
+            visible={dialogVisible}
+            onDismiss={() => setDialogVisible(false)}
+          >
+            <Dialog.Title style={{ fontFamily: "SpaceGrotesk_500Medium" }}>
+              New category
+            </Dialog.Title>
+            <Dialog.Content>
+              <TextInput
+                label="Category name"
+                value={draftName}
+                onChangeText={setDraftName}
+                mode="outlined"
+                maxLength={MAX_CATEGORY_NAME_LENGTH}
+                autoCapitalize="words"
+                autoCorrect={false}
+                style={styles.textInput}
+                contentStyle={styles.textInputContent}
+              />
+              <Text
+                style={{
+                  marginTop: 6,
+                  textAlign: "right",
+                  color: theme.colors.onSurfaceVariant,
+                  fontFamily: "SpaceGrotesk_500Medium",
+                }}
+              >
+                {draftName.length}/{MAX_CATEGORY_NAME_LENGTH}
+              </Text>
+              <TextInput
+                label="Description"
+                value={draftDescription}
+                onChangeText={setDraftDescription}
+                mode="outlined"
+                style={[styles.descriptionInput, styles.textInput]}
+                contentStyle={styles.textInputContent}
+                autoCapitalize="sentences"
+              />
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button onPress={() => setDialogVisible(false)}>Cancel</Button>
+              <Button onPress={handleSaveCategory}>Save</Button>
+            </Dialog.Actions>
+          </Dialog>
 
-        <Dialog
-          visible={editDialogVisible}
-          onDismiss={() => {
-            setEditDialogVisible(false);
-            setEditingCategory(null);
-            setDraftName("");
-            setDraftDescription("");
-          }}
-        >
-          <Dialog.Title style={{ fontFamily: "SpaceGrotesk_500Medium" }}>
-            Edit category
-          </Dialog.Title>
-          <Dialog.Content>
-            <TextInput
-              label="Category name"
-              value={draftName}
-              onChangeText={setDraftName}
-              mode="outlined"
-              maxLength={MAX_CATEGORY_NAME_LENGTH}
-              autoCapitalize="words"
-              autoCorrect={false}
-              style={styles.textInput}
-              contentStyle={styles.textInputContent}
-            />
-            <Text
-              style={{
-                marginTop: 6,
-                textAlign: "right",
-                color: theme.colors.onSurfaceVariant,
-                fontFamily: "SpaceGrotesk_500Medium",
-              }}
-            >
-              {draftName.length}/{MAX_CATEGORY_NAME_LENGTH}
-            </Text>
-            <TextInput
-              label="Description"
-              value={draftDescription}
-              onChangeText={setDraftDescription}
-              mode="outlined"
-              style={[styles.descriptionInput, styles.textInput]}
-              contentStyle={styles.textInputContent}
-              autoCapitalize="sentences"
-            />
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button
-              onPress={() => {
-                setEditDialogVisible(false);
-                setEditingCategory(null);
-                setDraftName("");
-                setDraftDescription("");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onPress={handleUpdateCategory}>Save</Button>
-          </Dialog.Actions>
-        </Dialog>
+          <Dialog
+            visible={editDialogVisible}
+            onDismiss={() => {
+              setEditDialogVisible(false);
+              setEditingCategory(null);
+              setDraftName("");
+              setDraftDescription("");
+            }}
+          >
+            <Dialog.Title style={{ fontFamily: "SpaceGrotesk_500Medium" }}>
+              Edit category
+            </Dialog.Title>
+            <Dialog.Content>
+              <TextInput
+                label="Category name"
+                value={draftName}
+                onChangeText={setDraftName}
+                mode="outlined"
+                maxLength={MAX_CATEGORY_NAME_LENGTH}
+                autoCapitalize="words"
+                autoCorrect={false}
+                style={styles.textInput}
+                contentStyle={styles.textInputContent}
+              />
+              <Text
+                style={{
+                  marginTop: 6,
+                  textAlign: "right",
+                  color: theme.colors.onSurfaceVariant,
+                  fontFamily: "SpaceGrotesk_500Medium",
+                }}
+              >
+                {draftName.length}/{MAX_CATEGORY_NAME_LENGTH}
+              </Text>
+              <TextInput
+                label="Description"
+                value={draftDescription}
+                onChangeText={setDraftDescription}
+                mode="outlined"
+                style={[styles.descriptionInput, styles.textInput]}
+                contentStyle={styles.textInputContent}
+                autoCapitalize="sentences"
+              />
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button
+                onPress={() => {
+                  setEditDialogVisible(false);
+                  setEditingCategory(null);
+                  setDraftName("");
+                  setDraftDescription("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button onPress={handleUpdateCategory}>Save</Button>
+            </Dialog.Actions>
+          </Dialog>
 
-        <Dialog
-          visible={deleteDialogVisible}
-          onDismiss={() => setDeleteDialogVisible(false)}
-        >
-          <Dialog.Title style={{ fontFamily: "SpaceGrotesk_500Medium" }}>
-            Move saved games?
-          </Dialog.Title>
-          <Dialog.Content>
-            <Text style={{ fontFamily: "SpaceGrotesk_400Regular" }}>
-              {categoryToDelete
-                ? `Games currently in ${categoryToDelete.name} will be reassigned to another category.`
-                : "This category has games saved to it."}
-            </Text>
-            <TextInput
-              label="Move to category"
-              value={
-                categories.find(
-                  (category) => category.id === replacementCategoryId
-                )?.name ?? ""
-              }
-              mode="outlined"
-              style={styles.reassignInput}
-              onFocus={() => {
-                const firstAvailable = categories.find(
-                  (category) => category.id !== categoryToDelete?.id
-                );
-                if (firstAvailable) {
-                  setReplacementCategoryId(firstAvailable.id);
+          <Dialog
+            visible={deleteDialogVisible}
+            onDismiss={() => setDeleteDialogVisible(false)}
+          >
+            <Dialog.Title style={{ fontFamily: "SpaceGrotesk_500Medium" }}>
+              Move saved games?
+            </Dialog.Title>
+            <Dialog.Content>
+              <Text style={{ fontFamily: "SpaceGrotesk_400Regular" }}>
+                {categoryToDelete
+                  ? `Games currently in ${categoryToDelete.name} will be reassigned to another category.`
+                  : "This category has games saved to it."}
+              </Text>
+              <TextInput
+                label="Move to category"
+                value={
+                  categories.find(
+                    (category) => category.id === replacementCategoryId
+                  )?.name ?? ""
                 }
-              }}
-              editable={false}
-            />
-            <View style={styles.reassignRow}>
-              {categories
-                .filter((category) => category.id !== categoryToDelete?.id)
-                .map((category) => (
-                  <Button
-                    key={category.id}
-                    mode={
-                      replacementCategoryId === category.id
-                        ? "contained"
-                        : "outlined"
-                    }
-                    onPress={() => setReplacementCategoryId(category.id)}
-                    style={styles.reassignButton}
-                  >
-                    {category.name}
-                  </Button>
-                ))}
-            </View>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setDeleteDialogVisible(false)}>
-              Cancel
-            </Button>
-            <Button onPress={confirmDeleteCategory}>Delete</Button>
-          </Dialog.Actions>
-        </Dialog>
+                mode="outlined"
+                style={styles.reassignInput}
+                onFocus={() => {
+                  const firstAvailable = categories.find(
+                    (category) => category.id !== categoryToDelete?.id
+                  );
+                  if (firstAvailable) {
+                    setReplacementCategoryId(firstAvailable.id);
+                  }
+                }}
+                editable={false}
+              />
+              <View style={styles.reassignRow}>
+                {categories
+                  .filter((category) => category.id !== categoryToDelete?.id)
+                  .map((category) => (
+                    <Button
+                      key={category.id}
+                      mode={
+                        replacementCategoryId === category.id
+                          ? "contained"
+                          : "outlined"
+                      }
+                      onPress={() => setReplacementCategoryId(category.id)}
+                      style={styles.reassignButton}
+                    >
+                      {category.name}
+                    </Button>
+                  ))}
+              </View>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button onPress={() => setDeleteDialogVisible(false)}>
+                Cancel
+              </Button>
+              <Button onPress={confirmDeleteCategory}>Delete</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </KeyboardAvoidingView>
+
       </Portal>
-    </SafeAreaView>
+    </View>
   );
 }
 

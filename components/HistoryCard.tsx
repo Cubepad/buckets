@@ -46,6 +46,17 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
   const [logVisible, setLogVisible] = useState(false);
   const [categoryMenuKey, setCategoryMenuKey] = useState(0);
 
+  const getTeamIconStyle = (isHigher: boolean) => ({
+  backgroundColor: isHigher
+    ? theme.colors.primaryContainer
+    : theme.colors.surfaceVariant,
+  iconColor: isHigher ? theme.colors.primary : theme.colors.onSurface,
+  textColor: isHigher ? theme.colors.primary : theme.colors.onSurface,
+  });
+
+  const team1Style = getTeamIconStyle(score1 > score2);
+  const team2Style = getTeamIconStyle(score2 > score1);
+
   const openCategoryMenu = () => {
     setMenuVisible(false);
     setCategoryMenuKey((prev) => prev + 1);
@@ -94,18 +105,18 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
             <View
               style={[
                 styles.iconCircle,
-                { backgroundColor: theme.colors.surfaceVariant },
+                { backgroundColor: team1Style.backgroundColor },
               ]}
             >
               <MaterialCommunityIcons
                 name="shield"
                 size={32}
-                color={theme.colors.onSurfaceVariant}
+                color={team1Style.iconColor}
               />
             </View>
             <Text
               numberOfLines={1}
-              style={[styles.teamName, { color: theme.colors.onSurface }]}
+              style={[styles.teamName, { color: team1Style.textColor }]}
             >
               {team1}
             </Text>
@@ -121,18 +132,18 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
             <View
               style={[
                 styles.iconCircle,
-                { backgroundColor: theme.colors.primaryContainer },
+                { backgroundColor: team2Style.backgroundColor },
               ]}
             >
               <MaterialCommunityIcons
                 name="shield"
                 size={32}
-                color={theme.colors.primary}
+                color={team2Style.iconColor}
               />
             </View>
             <Text
               numberOfLines={1}
-              style={[styles.teamName, { color: theme.colors.primary }]}
+              style={[styles.teamName, { color: team2Style.textColor }]}
             >
               {team2}
             </Text>
@@ -162,6 +173,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
                 key={categoryMenuKey}
                 visible={menuVisible}
                 onDismiss={closeCategoryMenu}
+                contentStyle={{ borderRadius: 12 }}
                 anchor={
                   <Button
                     compact
