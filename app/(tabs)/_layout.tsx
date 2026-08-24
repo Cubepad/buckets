@@ -2,53 +2,46 @@ import { StyleSheet } from "react-native";
 import { Tabs } from "expo-router";
 import { BottomNavigation, Text, useTheme } from "react-native-paper";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { CommonActions } from "@react-navigation/native";
+import { BottomTabBarProps } from "expo-router/js-tabs";
+import { CommonActions } from "expo-router/react-navigation";
 
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const theme = useTheme();
 
   return (
-    <BottomNavigation.Bar
-      navigationState={state}
-      activeColor={theme.colors.onPrimaryContainer}
-      inactiveColor={theme.colors.onSurfaceVariant}
-      activeIndicatorStyle={{
-        backgroundColor: theme.colors.primaryContainer,
-        borderRadius: 18,
-      }}
-      shifting={true}
-      compact={false}
-      onTabPress={({ route, preventDefault }) => {
-        const event = navigation.emit({
-          type: "tabPress",
-          target: route.key,
-          canPreventDefault: true,
-        });
+<BottomNavigation.Bar
+  navigationState={state}
+  activeColor={theme.colors.onPrimaryContainer}
+  inactiveColor={theme.colors.onSurfaceVariant}
 
-        if (event.defaultPrevented) {
-          preventDefault();
-        } else {
-          navigation.dispatch({
-            ...CommonActions.navigate(route.name, route.params),
-            target: state.key,
-          });
-        }
-      }}
-      renderIcon={({ route, focused, color }) =>
-        descriptors[route.key].options.tabBarIcon?.({
-          color,
-          size: 24,
-          focused,
-        }) ?? null
-      }
-      // Replaces labelStyle with renderLabel to preserve typography and animated color
-      renderLabel={({ route, color }) => (
-        <Text style={[styles.labelText, { color }]}>
-          {descriptors[route.key].options.title ?? route.name}
-        </Text>
-      )}
-    />
+  shifting={false}
+  compact={false}
+  onTabPress={({ route, preventDefault }) => {
+    const event = navigation.emit({
+      type: "tabPress",
+      target: route.key,
+      canPreventDefault: true,
+    });
+    if (event.defaultPrevented) {
+      preventDefault();
+    } else {
+      navigation.dispatch({
+        ...CommonActions.navigate(route.name, route.params),
+        target: state.key,
+      });
+    }
+  }}
+  renderIcon={({ route, focused, color }) =>
+    descriptors[route.key].options.tabBarIcon?.({
+      color,
+      size: 24,
+      focused,
+    }) ?? null
+  }
+  getLabelText={({ route }) =>
+    descriptors[route.key].options.title ?? route.name
+  }
+/>
   );
 }
 

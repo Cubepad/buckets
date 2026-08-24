@@ -228,17 +228,16 @@ export default function HomeScreen() {
     <View
       style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
     >
-      <Appbar.Header mode="center-aligned">
+      <Appbar.Header>
         <Appbar.Content
           titleStyle={{
-            fontFamily: "SpaceGrotesk_600SemiBold",
+            fontFamily: "SpaceGrotesk_700Bold",
             fontSize: 24,
             letterSpacing: -1,
           }}
           title="Buckets Scoreboard"
         />
         <Menu
-          key={menuKey}
           visible={visible}
           onDismiss={closeMenu}
           anchor={

@@ -46,12 +46,12 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
   const [logVisible, setLogVisible] = useState(false);
   const [categoryMenuKey, setCategoryMenuKey] = useState(0);
 
-  const getTeamIconStyle = (isHigher: boolean) => ({
-  backgroundColor: isHigher
-    ? theme.colors.primaryContainer
-    : theme.colors.surfaceVariant,
-  iconColor: isHigher ? theme.colors.primary : theme.colors.onSurface,
-  textColor: isHigher ? theme.colors.primary : theme.colors.onSurface,
+  const getTeamIconStyle = (isWinner: boolean) => ({
+    backgroundColor: isWinner
+      ? theme.colors.primaryContainer
+      : theme.colors.surfaceVariant,
+    iconColor: isWinner ? theme.colors.primary : theme.colors.onSurface,
+    textColor: isWinner ? theme.colors.primary : theme.colors.onSurface,
   });
 
   const team1Style = getTeamIconStyle(score1 > score2);
@@ -170,7 +170,6 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
           <View style={styles.footerActions}>
             {categories.length > 0 ? (
               <Menu
-                key={categoryMenuKey}
                 visible={menuVisible}
                 onDismiss={closeCategoryMenu}
                 contentStyle={{ borderRadius: 12 }}
@@ -240,9 +239,11 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
           </Dialog.Title>
           <Dialog.Content>
             {scoreLog.length > 0 ? (
-              <ScrollView style={styles.logList}>
+              <ScrollView style={styles.logList}
+              showsVerticalScrollIndicator={false}>
                 {scoreLog.map((entry) => {
                   const isTeamA = entry.team === "A";
+                  const isWinner = isTeamA ? score1 > score2 : score2 > score1;
                   const elapsedLabel = formatElapsedTime(entry.elapsedSeconds);
 
                   return (
@@ -251,9 +252,9 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
                       style={[
                         styles.logRow,
                         {
-                          backgroundColor: isTeamA
+                          backgroundColor: isWinner
                             ? theme.colors.primaryContainer
-                            : theme.colors.secondaryContainer,
+                            : theme.colors.surfaceVariant,
                         },
                         isTeamA ? styles.logRowLeft : styles.logRowRight,
                       ]}
@@ -263,14 +264,15 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
                           style={[
                             styles.logTeamName,
                             {
-                              color: isTeamA
+                              color: isWinner
                                 ? theme.colors.onPrimaryContainer
-                                : theme.colors.onSecondaryContainer,
+                                : theme.colors.onSurface,
                             },
                           ]}
                         >
                           {isTeamA ? team1 : team2}
                         </Text>
+
                         <Text
                           style={[
                             styles.logDelta,

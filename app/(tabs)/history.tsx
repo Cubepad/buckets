@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, View, ScrollView, Text } from "react-native";
+import { StyleSheet, View, ScrollView, FlatList, Text } from "react-native";
 import {
   Button,
   useTheme,
@@ -9,7 +9,7 @@ import {
   Dialog,
   Portal,
 } from "react-native-paper";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "expo-router/react-navigation";
 import { useSegments } from "expo-router";
 import HistoryCard from "../../components/HistoryCard";
 import {
@@ -68,56 +68,79 @@ const History = () => {
     };
   }, []);
 
-  const handleDeleteGame = async (gameId: string) => {
-    const nextHistory = historyData.filter((game) => game.id !== gameId);
-    setHistoryData(nextHistory);
-    await persistSavedGames(nextHistory);
+  const handleDeleteGame = useCallback(async (gameId: string) => {
+    setHistoryData((prev) => {
+      const next = prev.filter((game) => game.id !== gameId);
+      persistSavedGames(next);
+      return next;
+    });
+  }, []);
 
-    const refreshedHistory = await loadSavedGames();
-    setHistoryData(refreshedHistory);
-  };
-
-  const handleClearHistory = async () => {
+  const handleClearHistory = useCallback(async () => {
     setHistoryData([]);
     setClearDialogVisible(false);
     await persistSavedGames([]);
+  }, []);
 
-    const refreshedHistory = await loadSavedGames();
-    setHistoryData(refreshedHistory);
-  };
-
-  const handleClearHistoryPress = async () => {
+  const handleClearHistoryPress = useCallback(async () => {
     if (!settings.confirmDestructiveActions) {
       await handleClearHistory();
       return;
     }
 
     setClearDialogVisible(true);
-  };
+  }, [settings.confirmDestructiveActions, handleClearHistory]);
 
-  const handleCategoryChange = async (gameId: string, categoryId: string) => {
-    const nextHistory = historyData.map((game) => {
-      if (game.id !== gameId) {
-        return game;
-      }
+  const handleCategoryChange = useCallback(
+    async (gameId: string, categoryId: string) => {
+      setHistoryData((prev) => {
+        const next = prev.map((game) => {
+          if (game.id !== gameId) {
+            return game;
+          }
 
-      const category =
-        categories.find((item) => item.id === categoryId) ?? categories[0];
-      return {
-        ...game,
-        categoryId,
-        categoryName: category?.name ?? "Pickup Games",
-      };
-    });
-
-    setHistoryData(nextHistory);
-    await persistSavedGames(nextHistory);
-  };
+          const category =
+            categories.find((item) => item.id === categoryId) ?? categories[0];
+          return {
+            ...game,
+            categoryId,
+            categoryName: category?.name ?? "Pickup Games",
+          };
+        });
+        persistSavedGames(next);
+        return next;
+      });
+    },
+    [categories]
+  );
 
   const filteredHistory =
     selectedCategory === "all"
       ? historyData
       : historyData.filter((game) => game.categoryId === selectedCategory);
+
+  const renderHistoryCard = useCallback(
+    ({ item }: { item: SavedGame }) => (
+      <HistoryCard
+        gameId={item.id}
+        team1={item.teamAName}
+        team2={item.teamBName}
+        score1={item.scoreA}
+        score2={item.scoreB}
+        date={item.date}
+        duration={item.duration}
+        categoryName={item.categoryName ?? "Pickup Games"}
+        categoryId={item.categoryId ?? "pickup"}
+        categories={categories}
+        scoreLog={item.scoreLog ?? []}
+        onCategoryChange={(categoryId: string) =>
+          handleCategoryChange(item.id, categoryId)
+        }
+        onDelete={handleDeleteGame}
+      />
+    ),
+    [categories, handleCategoryChange, handleDeleteGame]
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.surface }}>
@@ -131,99 +154,81 @@ const History = () => {
           title="History"
         />
       </Appbar.Header>
-
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {settings.showHistoryCategoryFilters ? (
-          <Surface
+      {settings.showHistoryCategoryFilters ? (
+        <Surface
+          style={[
+            styles.filterCard,
+            { backgroundColor: theme.colors.elevation.level1 },
+          ]}
+          elevation={1}
+        >
+          <Text
             style={[
-              styles.filterCard,
-              { backgroundColor: theme.colors.elevation.level1 },
+              styles.filterLabel,
+              { color: theme.colors.onSurfaceVariant },
             ]}
-            elevation={1}
           >
-            <Text
-              style={[
-                styles.filterLabel,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
+            Filter categories
+          </Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.filterRow}
+          >
+            <Chip
+              selected={selectedCategory === "all"}
+              onPress={() => setSelectedCategory("all")}
+              style={styles.filterChip}
+              textStyle={styles.filterChipText}
             >
-              Filter categories
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.filterRow}
-            >
+              All
+            </Chip>
+            {categories.map((category) => (
               <Chip
-                selected={selectedCategory === "all"}
-                onPress={() => setSelectedCategory("all")}
+                key={category.id}
+                selected={selectedCategory === category.id}
+                onPress={() => setSelectedCategory(category.id)}
                 style={styles.filterChip}
                 textStyle={styles.filterChipText}
               >
-                All
+                {category.name}
               </Chip>
-              {categories.map((category) => (
-                <Chip
-                  key={category.id}
-                  selected={selectedCategory === category.id}
-                  onPress={() => setSelectedCategory(category.id)}
-                  style={styles.filterChip}
-                  textStyle={styles.filterChipText}
-                >
-                  {category.name}
-                </Chip>
-              ))}
-            </ScrollView>
-          </Surface>
-        ) : null}
+            ))}
+          </ScrollView>
+        </Surface>
+      ) : null}
+      <Button
+        mode="contained"
+        onPress={handleClearHistoryPress}
+        style={styles.clearButton}
+        disabled={historyData.length === 0}
+      >
+        Clear All History
+      </Button>
 
-        <View style={styles.historyList}>
-          {filteredHistory.length === 0 ? (
-            <Text
-              style={[
-                styles.emptyState,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
-            >
-              No games saved yet.
-            </Text>
-          ) : (
-            filteredHistory.map((item) => (
-              <HistoryCard
-                key={item.id}
-                gameId={item.id}
-                team1={item.teamAName}
-                team2={item.teamBName}
-                score1={item.scoreA}
-                score2={item.scoreB}
-                date={item.date}
-                duration={item.duration}
-                categoryName={item.categoryName ?? "Pickup Games"}
-                categoryId={item.categoryId ?? "pickup"}
-                categories={categories}
-                scoreLog={item.scoreLog ?? []}
-                onCategoryChange={(categoryId: string) =>
-                  handleCategoryChange(item.id, categoryId)
-                }
-                onDelete={handleDeleteGame}
-              />
-            ))
-          )}
-        </View>
-
-        <Button
-          mode="contained"
-          onPress={handleClearHistoryPress}
-          style={styles.clearButton}
-          disabled={historyData.length === 0}
-        >
-          Clear All History
-        </Button>
-      </ScrollView>
+      <FlatList
+        style={styles.container}
+        contentContainerStyle={[styles.scrollContent, styles.historyList]}
+        showsVerticalScrollIndicator={false}
+        data={filteredHistory}
+        keyExtractor={(item) => item.id}
+        renderItem={renderHistoryCard}
+        ListEmptyComponent={
+          <Text
+            style={[
+              styles.emptyState,
+              { color: theme.colors.onSurfaceVariant },
+            ]}
+          >
+            No games saved yet.
+          </Text>
+        }
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={7}
+        removeClippedSubviews
+      />
 
       <Portal>
         <Dialog

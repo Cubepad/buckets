@@ -1,13 +1,12 @@
 {
   "expo": {
-    "name": "buckets",
+    "name": "Buckets",
     "slug": "buckets",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/Buckets_Logo_Icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": false
     },
@@ -17,7 +16,6 @@
         "backgroundColor": "#B6CFFF",
         "monochromeImage": "./assets/images/Buckets_Logo_monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.cubepad.buckets"
     },
     "web": {
@@ -31,13 +29,14 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/Buckets_Logo_adaptive.png",
-          "imageWidth": 200,
+          "imageWidth": 300,
           "resizeMode": "contain",
-          "backgroundColor": "#B6CFFF"
+          "backgroundColor": "#020625"
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true

@@ -43,7 +43,7 @@ const About = () => {
             { color: theme.colors.onSurfaceVariant, marginTop: 4 },
           ]}
         >
-          Version 1.0.0 (Demo)
+          Version 1.0.0 (Alpha)
         </Text>
 
         <View style={styles.sectionSpacing} />

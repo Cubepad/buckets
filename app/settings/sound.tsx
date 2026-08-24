@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { Appbar, Surface, Switch, Text, useTheme } from "react-native-paper";
+import { Appbar, Surface, Text, useTheme } from "react-native-paper";
+import { Host, Switch } from "@expo/ui";
 import { useRouter } from "expo-router";
 import {
   AppSettings,
@@ -58,15 +59,17 @@ const SoundSettings = () => {
                 Button taps and selection feedback
               </Text>
             </View>
-            <Switch
-              value={settings.hapticsEnabled}
-              onValueChange={async (value) => {
-                if (value) {
-                  await triggerFeedback("selection");
-                }
-                await updateSetting({ hapticsEnabled: value });
-              }}
-            />
+            <Host style={styles.switchHost}>
+              <Switch
+                value={settings.hapticsEnabled}
+                onValueChange={async (value) => {
+                  if (value) {
+                    await triggerFeedback("selection");
+                  }
+                  await updateSetting({ hapticsEnabled: value });
+                }}
+              />
+            </Host>
           </View>
         </Surface>
 
@@ -85,15 +88,17 @@ const SoundSettings = () => {
                 Enable vibration feedback
               </Text>
             </View>
-            <Switch
-              value={settings.vibrationEnabled}
-              onValueChange={async (value) => {
-                if (value) {
-                  await triggerFeedback("selection");
-                }
-                await updateSetting({ vibrationEnabled: value });
-              }}
-            />
+            <Host style={styles.switchHost}>
+              <Switch
+                value={settings.vibrationEnabled}
+                onValueChange={async (value) => {
+                  if (value) {
+                    await triggerFeedback("selection");
+                  }
+                  await updateSetting({ vibrationEnabled: value });
+                }}
+              />
+            </Host>
           </View>
         </Surface>
       </View>
@@ -111,6 +116,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   textWrap: { flex: 1, paddingRight: 12 },
+  switchHost: {
+    width: 51,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headerTitle: {
     fontFamily: "SpaceGrotesk_600SemiBold",
     fontSize: 24,

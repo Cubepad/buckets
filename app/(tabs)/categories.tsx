@@ -211,7 +211,6 @@ export default function CategoriesScreen() {
               description={category.description}
               titleStyle={styles.categoryTitle}
               descriptionStyle={styles.categoryDescription}
-              left={(props) => <List.Icon {...props} icon="tag-outline" />}
               right={() => (
                 <View style={styles.rightActions}>
                   <Button

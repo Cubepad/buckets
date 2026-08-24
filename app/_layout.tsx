@@ -1,9 +1,11 @@
 import { Stack } from "expo-router";
+import { Platform } from "react-native";
+import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { PaperProvider, MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 import { View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import {
@@ -23,7 +25,7 @@ import {
   DarkTheme,
   DefaultTheme,
   useFocusEffect,
-} from "@react-navigation/native";
+} from "expo-router/react-navigation";
 
 // Keep the splash screen visible until fonts are loaded.
 SplashScreen.preventAutoHideAsync();
@@ -33,19 +35,20 @@ export default function RootLayout() {
   const [themeMode, setThemeMode] = useState<ThemeMode>("system");
   const [themeHydrated, setThemeHydrated] = useState(false);
 
+  const { theme: material3Theme } = useMaterial3Theme({
+    fallbackSourceColor: "#005FAF",
+  });
+
   useEffect(() => {
     const loadThemeMode = async () => {
       const settings = await loadAppSettings();
       setThemeMode(settings.themeMode);
       setThemeHydrated(true);
     };
-
     loadThemeMode();
-
     const unsubscribe = subscribeAppSettings(() => {
       loadThemeMode();
     });
-
     return () => {
       unsubscribe();
     };
@@ -65,7 +68,6 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
-  if (!fontsLoaded || !themeHydrated) return null;
 
   // Define typography styles using the loaded fonts.
   const typography = {
@@ -271,11 +273,24 @@ export default function RootLayout() {
     },
     fonts: { ...MD3DarkTheme.fonts, ...typography },
   };
-
   const effectiveScheme = themeMode === "system" ? colorScheme : themeMode;
 
-  const paperTheme =
-    effectiveScheme === "dark" ? customDarkTheme : customLightTheme;
+  const paperTheme = useMemo(() => {
+    if (Platform.OS === "android") {
+      const dynamicColors =
+        material3Theme[effectiveScheme === "dark" ? "dark" : "light"];
+      const base = effectiveScheme === "dark" ? MD3DarkTheme : MD3LightTheme;
+      return {
+        ...base,
+        colors: { ...base.colors, ...dynamicColors },
+        fonts: { ...base.fonts, ...typography },
+      };
+    }
+    return effectiveScheme === "dark" ? customDarkTheme : customLightTheme;
+  }, [effectiveScheme, material3Theme]);
+
+  // Early return now happens AFTER every hook has run
+  if (!fontsLoaded || !themeHydrated) return null;
 
   return (
     <PaperProvider theme={paperTheme}>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { Appbar, Surface, Switch, Text, useTheme } from "react-native-paper";
+import { Appbar, Surface, Text, useTheme } from "react-native-paper";
+import { Host, Switch } from "@expo/ui";
 import { useRouter } from "expo-router";
 import {
   AppSettings,
@@ -55,15 +56,17 @@ const GameplaySettings = () => {
                 Start the match clock as soon as scoring begins.
               </Text>
             </View>
-            <Switch
-              value={settings.autoStartTimerOnScore}
-              onValueChange={async (value) => {
-                if (value) {
-                  await triggerFeedback("selection");
-                }
-                await updateSetting({ autoStartTimerOnScore: value });
-              }}
-            />
+            <Host style={styles.switchHost}>
+              <Switch
+                value={settings.autoStartTimerOnScore}
+                onValueChange={async (value) => {
+                  if (value) {
+                    await triggerFeedback("selection");
+                  }
+                  await updateSetting({ autoStartTimerOnScore: value });
+                }}
+              />
+            </Host>
           </View>
         </Surface>
 
@@ -82,15 +85,17 @@ const GameplaySettings = () => {
                 Display the last scored point summary above the timer.
               </Text>
             </View>
-            <Switch
-              value={settings.showLastScorerSummary}
-              onValueChange={async (value) => {
-                if (value) {
-                  await triggerFeedback("selection");
-                }
-                await updateSetting({ showLastScorerSummary: value });
-              }}
-            />
+            <Host style={styles.switchHost}>
+              <Switch
+                value={settings.showLastScorerSummary}
+                onValueChange={async (value) => {
+                  if (value) {
+                    await triggerFeedback("selection");
+                  }
+                  await updateSetting({ showLastScorerSummary: value });
+                }}
+              />
+            </Host>
           </View>
         </Surface>
 
@@ -109,15 +114,17 @@ const GameplaySettings = () => {
                 Keep the Edit chips visible on each team name.
               </Text>
             </View>
-            <Switch
-              value={settings.showEditHints}
-              onValueChange={async (value) => {
-                if (value) {
-                  await triggerFeedback("selection");
-                }
-                await updateSetting({ showEditHints: value });
-              }}
-            />
+            <Host style={styles.switchHost}>
+              <Switch
+                value={settings.showEditHints}
+                onValueChange={async (value) => {
+                  if (value) {
+                    await triggerFeedback("selection");
+                  }
+                  await updateSetting({ showEditHints: value });
+                }}
+              />
+            </Host>
           </View>
         </Surface>
 
@@ -136,15 +143,17 @@ const GameplaySettings = () => {
                 Require confirmation before clearing history or resetting.
               </Text>
             </View>
-            <Switch
-              value={settings.confirmDestructiveActions}
-              onValueChange={async (value) => {
-                if (value) {
-                  await triggerFeedback("selection");
-                }
-                await updateSetting({ confirmDestructiveActions: value });
-              }}
-            />
+            <Host style={styles.switchHost}>
+              <Switch
+                value={settings.confirmDestructiveActions}
+                onValueChange={async (value) => {
+                  if (value) {
+                    await triggerFeedback("selection");
+                  }
+                  await updateSetting({ confirmDestructiveActions: value });
+                }}
+              />
+            </Host>
           </View>
         </Surface>
 
@@ -163,15 +172,17 @@ const GameplaySettings = () => {
                 Display the score lead indicator beneath the scoreboard.
               </Text>
             </View>
-            <Switch
-              value={settings.showScoreProgress}
-              onValueChange={async (value) => {
-                if (value) {
-                  await triggerFeedback("selection");
-                }
-                await updateSetting({ showScoreProgress: value });
-              }}
-            />
+            <Host style={styles.switchHost}>
+              <Switch
+                value={settings.showScoreProgress}
+                onValueChange={async (value) => {
+                  if (value) {
+                    await triggerFeedback("selection");
+                  }
+                  await updateSetting({ showScoreProgress: value });
+                }}
+              />
+            </Host>
           </View>
         </Surface>
 
@@ -190,15 +201,17 @@ const GameplaySettings = () => {
                 Keep the category chips visible on the history page.
               </Text>
             </View>
-            <Switch
-              value={settings.showHistoryCategoryFilters}
-              onValueChange={async (value) => {
-                if (value) {
-                  await triggerFeedback("selection");
-                }
-                await updateSetting({ showHistoryCategoryFilters: value });
-              }}
-            />
+            <Host style={styles.switchHost}>
+              <Switch
+                value={settings.showHistoryCategoryFilters}
+                onValueChange={async (value) => {
+                  if (value) {
+                    await triggerFeedback("selection");
+                  }
+                  await updateSetting({ showHistoryCategoryFilters: value });
+                }}
+              />
+            </Host>
           </View>
         </Surface>
       </View>
@@ -216,6 +229,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   textWrap: { flex: 1, paddingRight: 12 },
+  switchHost: {
+    width: 51,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headerTitle: {
     fontFamily: "SpaceGrotesk_600SemiBold",
     fontSize: 24,
