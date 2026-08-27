@@ -1,6 +1,13 @@
 import React from "react";
-import { View, StyleSheet, Linking } from "react-native";
-import { Appbar, List, Surface, Text, useTheme } from "react-native-paper";
+import { View, StyleSheet, Linking, ScrollView, Image } from "react-native";
+import {
+  Appbar,
+  List,
+  Surface,
+  Text,
+  useTheme,
+  Divider,
+} from "react-native-paper";
 import { useRouter } from "expo-router";
 
 const About = () => {
@@ -17,8 +24,14 @@ const About = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <Appbar.Header style={{ backgroundColor: theme.colors.elevation.level1 }}>
-        <Appbar.BackAction onPress={() => router.back()} />
+      <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
+        <Appbar.BackAction
+          onPress={() => router.back()}
+          style={{
+            backgroundColor: theme.colors.surfaceVariant,
+            marginLeft: 16,
+          }}
+        />
         <Appbar.Content
           title="About"
           titleStyle={{
@@ -29,26 +42,33 @@ const About = () => {
         />
       </Appbar.Header>
 
-      <View style={styles.content}>
-        <Text
-          variant="headlineMedium"
-          style={[styles.centerText, { color: theme.colors.onBackground }]}
-        >
-          Buckets
-        </Text>
-        <Text
-          variant="bodyMedium"
-          style={[
-            styles.versionNumber,
-            { color: theme.colors.onSurfaceVariant, marginTop: 4 },
-          ]}
-        >
-          Version 1.0.0 (Alpha)
-        </Text>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Header Section with Logo */}
+        <View style={styles.headerSection}>
+          <Image
+            source={require("../../assets/images/Buckets_Logo_adaptive.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text
+            variant="headlineMedium"
+            style={[styles.appName, { color: theme.colors.onBackground }]}
+          >
+            Buckets
+          </Text>
+          <Text
+            variant="bodyMedium"
+            style={[
+              styles.versionNumber,
+              { color: theme.colors.onSurfaceVariant },
+            ]}
+          >
+            Version 1.0.0 (Alpha)
+          </Text>
+        </View>
 
-        <View style={styles.sectionSpacing} />
-
-        <Surface style={styles.contactItem} elevation={1}>
+        {/* Links & Info Section */}
+        <Surface style={styles.cardGroup} elevation={1}>
           <List.Item
             title="Developer"
             description="David Olaniyan"
@@ -56,9 +76,8 @@ const About = () => {
             titleStyle={styles.label}
             descriptionStyle={styles.value}
           />
-        </Surface>
+          <Divider />
 
-        <Surface style={styles.contactItem} elevation={1}>
           <List.Item
             title="Website"
             description="davidolaniyan.com"
@@ -66,10 +85,16 @@ const About = () => {
             onPress={() => openLink("https://davidolaniyan.com/")}
             titleStyle={styles.label}
             descriptionStyle={[styles.value, { color: theme.colors.primary }]}
+            right={(props) => (
+              <List.Icon
+                {...props}
+                icon="open-in-new"
+                color={theme.colors.onSurfaceVariant}
+              />
+            )}
           />
-        </Surface>
+          <Divider />
 
-        <Surface style={styles.contactItem} elevation={1}>
           <List.Item
             title="GitHub"
             description="github.com/Cubepad/buckets"
@@ -77,10 +102,16 @@ const About = () => {
             onPress={() => openLink("https://github.com/Cubepad/buckets")}
             titleStyle={styles.label}
             descriptionStyle={[styles.value, { color: theme.colors.primary }]}
+            right={(props) => (
+              <List.Icon
+                {...props}
+                icon="open-in-new"
+                color={theme.colors.onSurfaceVariant}
+              />
+            )}
           />
-        </Surface>
+          <Divider />
 
-        <Surface style={styles.contactItem} elevation={1}>
           <List.Item
             title="Email"
             description="davideniola108@gmail.com"
@@ -88,9 +119,23 @@ const About = () => {
             onPress={() => openLink("mailto:davideniola108@gmail.com")}
             titleStyle={styles.label}
             descriptionStyle={[styles.value, { color: theme.colors.primary }]}
+            right={(props) => (
+              <List.Icon
+                {...props}
+                icon="open-in-new"
+                color={theme.colors.onSurfaceVariant}
+              />
+            )}
           />
         </Surface>
-      </View>
+
+        {/* Footer */}
+        <Text
+          style={[styles.footerText, { color: theme.colors.onSurfaceVariant }]}
+        >
+          © {new Date().getFullYear()} David Olaniyan
+        </Text>
+      </ScrollView>
     </View>
   );
 };
@@ -99,28 +144,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  scrollContent: {
     paddingHorizontal: 24,
-    paddingTop: 24,
+    paddingBottom: 40,
   },
-  centerText: {
-    textAlign: "center",
+  headerSection: {
+    alignItems: "center",
+    paddingTop: 32,
+    paddingBottom: 40,
+  },
+  logo: {
+    width: 250,
+    height: 250,
+    borderRadius: 24,
+    marginBottom: 16,
+  },
+  appName: {
     fontFamily: "SpaceGrotesk_600SemiBold",
-    fontSize: 36,
+    fontSize: 32,
     letterSpacing: -0.75,
+    marginBottom: 4,
   },
   versionNumber: {
-    textAlign: "center",
     fontFamily: "SpaceGrotesk_600SemiBold",
     letterSpacing: -0.5,
   },
-  sectionSpacing: {
-    height: 32,
-  },
-  contactItem: {
-    marginBottom: 12,
+  cardGroup: {
     borderRadius: 16,
     overflow: "hidden",
+    marginBottom: 32,
   },
   label: {
     fontFamily: "SpaceGrotesk_500Medium",
@@ -129,6 +181,12 @@ const styles = StyleSheet.create({
   value: {
     fontFamily: "SpaceGrotesk_400Regular",
     fontSize: 14,
+  },
+  footerText: {
+    textAlign: "center",
+    fontFamily: "SpaceGrotesk_400Regular",
+    fontSize: 12,
+    opacity: 0.7,
   },
 });
 
