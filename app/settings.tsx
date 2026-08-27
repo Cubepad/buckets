@@ -27,7 +27,7 @@ const settingsItems = [
     id: 4,
     title: "Gameplay",
     description: "Timer and score defaults for match flow",
-    icon: "gamepad-variant",
+    icon: "basketball",
   },
   {
     id: 5,
@@ -49,13 +49,14 @@ const Settings = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
-      <Appbar.Header
-        style={[
-          styles.header,
-          { backgroundColor: theme.colors.elevation.level1 },
-        ]}
-      >
-        <Appbar.BackAction onPress={() => router.back()} />
+      <Appbar.Header style={{ backgroundColor: theme.colors.background, }}>
+        <Appbar.BackAction
+          onPress={() => router.back()}
+          style={{
+            backgroundColor: theme.colors.surfaceVariant,
+            marginLeft: 16, 
+          }}
+        />
         <Appbar.Content title="Settings" titleStyle={styles.headerTitle} />
       </Appbar.Header>
       <ScrollView

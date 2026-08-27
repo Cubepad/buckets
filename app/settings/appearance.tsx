@@ -13,6 +13,7 @@ import {
   DEFAULT_APP_SETTINGS,
   loadAppSettings,
   persistAppSettings,
+  subscribeAppSettings,
   ThemeMode,
   triggerFeedback,
 } from "../../utils/appSettings";
@@ -29,21 +30,37 @@ const AppearanceSettings = () => {
     };
 
     loadSettings();
+
+    // Subscribe to settings changes and return cleanup
+    const unsubscribe = subscribeAppSettings(loadSettings);
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
-  const updateTheme = async (themeMode: ThemeMode) => {
+  const updateTheme = (themeMode: ThemeMode) => {
     const nextSettings = { ...settings, themeMode };
+
+    // Update state immediately
     setSettings(nextSettings);
-    await persistAppSettings(nextSettings);
-    await triggerFeedback("selection");
+
+    // Save and trigger haptics in the background (non-blocking)
+    persistAppSettings(nextSettings);
+    triggerFeedback("selection");
   };
 
   return (
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <Appbar.Header style={{ backgroundColor: theme.colors.elevation.level1 }}>
-        <Appbar.BackAction onPress={() => router.back()} />
+      <Appbar.Header style={{ backgroundColor: theme.colors.background, }}>
+        <Appbar.BackAction
+          onPress={() => router.back()}
+          style={{
+            backgroundColor: theme.colors.surfaceVariant,
+            marginLeft: 16, 
+          }}
+        />
         <Appbar.Content title="Appearance" titleStyle={styles.headerTitle} />
       </Appbar.Header>
 

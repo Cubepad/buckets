@@ -35,8 +35,14 @@ const GameplaySettings = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <Appbar.Header style={{ backgroundColor: theme.colors.elevation.level1 }}>
-        <Appbar.BackAction onPress={() => router.back()} />
+      <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
+        <Appbar.BackAction
+          onPress={() => router.back()}
+          style={{
+            backgroundColor: theme.colors.surfaceVariant,
+            marginLeft: 16,
+          }}
+        />
         <Appbar.Content title="Gameplay" titleStyle={styles.headerTitle} />
       </Appbar.Header>
 
