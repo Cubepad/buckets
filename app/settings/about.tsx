@@ -46,7 +46,7 @@ const About = () => {
         {/* Header Section with Logo */}
         <View style={styles.headerSection}>
           <Image
-            source={require("../../assets/images/Buckets_Logo_adaptive.png")}
+            source={require("../../assets/images/Buckets_Logo_adaptive_splash.png")}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -154,10 +154,10 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   logo: {
-    width: 250,
-    height: 250,
+    width: 200,
+    height: 200,
     borderRadius: 24,
-    marginBottom: 16,
+
   },
   appName: {
     fontFamily: "SpaceGrotesk_600SemiBold",
