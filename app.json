@@ -13,7 +13,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/Buckets_Logo_adaptive.png",
-        "backgroundColor": "#B6CFFF",
+        "backgroundColor": "#FFFFFF",
         "monochromeImage": "./assets/images/Buckets_Logo_monochrome.png"
       },
       "package": "com.cubepad.buckets"
@@ -36,7 +36,8 @@
       ],
       "expo-font",
       "expo-web-browser",
-      "expo-status-bar"
+      "expo-status-bar",
+      "@react-native-vector-icons/material-design-icons"
     ],
     "experiments": {
       "typedRoutes": true
