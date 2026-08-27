@@ -108,13 +108,13 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
     outputRange: [theme.colors.elevation.level1, theme.colors.primary],
   });
 
-  const totalPoints = scoreA + scoreB;
-  const progressValue =
-    totalPoints > 0 && scoreA !== scoreB
-      ? scoreA > scoreB
-        ? scoreA / totalPoints
-        : scoreB / totalPoints
-      : 0;
+const totalPoints = scoreA + scoreB;
+const scoreDifference = Math.abs(scoreA - scoreB);
+
+const progressValue =
+  totalPoints > 0
+    ? scoreDifference / totalPoints
+    : 0;
 
   const openRenameDialog = async (team: "A" | "B") => {
     onGameActivity();
