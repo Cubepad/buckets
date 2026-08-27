@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { StyleSheet, View, Text, Pressable, ScrollView } from "react-native";
 import {
   useTheme,
@@ -10,6 +10,11 @@ import {
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { GameCategory, ScoreLogEntry } from "../utils/gameHistory";
+import BottomSheet, {
+  BottomSheetScrollView,
+  BottomSheetView,
+} from "@expo/ui/community/bottom-sheet";
+import { Host, Icon } from "@expo/ui";
 
 type HistoryCardProps = {
   gameId?: string;
@@ -43,8 +48,9 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
 }) => {
   const theme = useTheme();
   const [menuVisible, setMenuVisible] = useState(false);
-  const [logVisible, setLogVisible] = useState(false);
+  const sheetRef = useRef<BottomSheet>(null);
   const [categoryMenuKey, setCategoryMenuKey] = useState(0);
+  const [logVisible, setLogVisible] = useState(false);
 
   const getTeamIconStyle = (isWinner: boolean) => ({
     backgroundColor: isWinner
@@ -81,7 +87,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
     <Pressable
       onPress={() => {
         if (!menuVisible) {
-          setLogVisible(true);
+          sheetRef.current?.present();
         }
       }}
     >
@@ -108,11 +114,16 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
                 { backgroundColor: team1Style.backgroundColor },
               ]}
             >
-              <MaterialCommunityIcons
-                name="shield"
-                size={32}
-                color={team1Style.iconColor}
-              />
+              <Host matchContents>
+                <Icon
+                  name={Icon.select({
+                    ios: "shield",
+                    android: import("@expo/material-symbols/shield.xml"),
+                  })}
+                  size={32}
+                  color={team1Style.iconColor}
+                />
+              </Host>
             </View>
             <Text
               numberOfLines={1}
@@ -135,11 +146,16 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
                 { backgroundColor: team2Style.backgroundColor },
               ]}
             >
-              <MaterialCommunityIcons
-                name="shield"
-                size={32}
-                color={team2Style.iconColor}
-              />
+              <Host matchContents>
+                <Icon
+                  name={Icon.select({
+                    ios: "shield",
+                    android: import("@expo/material-symbols/shield.xml"),
+                  })}
+                  size={32}
+                  color={team2Style.iconColor}
+                />
+              </Host>
             </View>
             <Text
               numberOfLines={1}
@@ -152,11 +168,16 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
 
         <View style={styles.footer}>
           <View style={styles.durationContainer}>
-            <MaterialCommunityIcons
-              name="clock-outline"
-              size={16}
-              color={theme.colors.onSurfaceVariant}
-            />
+              <Host matchContents>
+                <Icon
+                  name={Icon.select({
+                    ios: "clock",
+                    android: import("@expo/material-symbols/timer.xml"),
+                  })}
+                  size={16}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </Host>
             <Text
               style={[
                 styles.durationText,
@@ -232,85 +253,167 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
         </View>
       </Surface>
 
-      <Portal>
-        <Dialog visible={logVisible} onDismiss={() => setLogVisible(false)}>
-          <Dialog.Title style={{ fontFamily: "SpaceGrotesk_500Medium" }}>
-            Game log
-          </Dialog.Title>
-          <Dialog.Content>
-            {scoreLog.length > 0 ? (
-              <ScrollView style={styles.logList}
-              showsVerticalScrollIndicator={false}>
-                {scoreLog.map((entry) => {
-                  const isTeamA = entry.team === "A";
-                  const isWinner = isTeamA ? score1 > score2 : score2 > score1;
-                  const elapsedLabel = formatElapsedTime(entry.elapsedSeconds);
+      <BottomSheet
+        ref={sheetRef}
+        index={-1}
+        snapPoints={["70%", "90%"]}
+        enablePanDownToClose
+        backgroundStyle={{
+          backgroundColor: theme.colors.elevation.level2,
+        }}
+      >
+        <BottomSheetView style={styles.sheetContent}>
+          <View style={styles.sheetHeader}>
+            <View>
+              <Text
+                style={[styles.sheetTitle, { color: theme.colors.onSurface }]}
+              >
+                Game log
+              </Text>
 
-                  return (
-                    <View
-                      key={entry.id}
-                      style={[
-                        styles.logRow,
-                        {
-                          backgroundColor: isWinner
-                            ? theme.colors.primaryContainer
-                            : theme.colors.surfaceVariant,
-                        },
-                        isTeamA ? styles.logRowLeft : styles.logRowRight,
-                      ]}
-                    >
-                      <View style={styles.logTeamBlock}>
-                        <Text
-                          style={[
-                            styles.logTeamName,
-                            {
-                              color: isWinner
-                                ? theme.colors.onPrimaryContainer
-                                : theme.colors.onSurface,
-                            },
-                          ]}
-                        >
-                          {isTeamA ? team1 : team2}
-                        </Text>
+              <Text
+                style={[
+                  styles.sheetSubtitle,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {team1} vs {team2}
+              </Text>
+            </View>
 
+            <Button
+              compact
+              mode="text"
+              onPress={() => sheetRef.current?.close()}
+            >
+              Close
+            </Button>
+          </View>
+
+          <View style={styles.teamHeaders}>
+            <View style={styles.teamHeader}>
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.teamHeaderText,
+                  { color: theme.colors.onSurface },
+                ]}
+              >
+                {team1}
+              </Text>
+            </View>
+
+            <View style={styles.teamHeader}>
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.teamHeaderText,
+                  { color: theme.colors.onSurface },
+                ]}
+              >
+                {team2}
+              </Text>
+            </View>
+          </View>
+        </BottomSheetView>
+
+        <BottomSheetScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.logListContent}
+        >
+          {scoreLog.length > 0 ? (
+            [...scoreLog].reverse().map((entry) => {
+              const isTeamA = entry.team === "A";
+              const elapsedLabel = formatElapsedTime(entry.elapsedSeconds);
+
+              return (
+                <View key={entry.id} style={styles.logRow}>
+                  <View style={styles.logTeamColumn}>
+                    {isTeamA && (
+                      <View
+                        style={[
+                          styles.scoreEvent,
+                          {
+                            backgroundColor: theme.colors.primaryContainer,
+                          },
+                        ]}
+                      >
                         <Text
                           style={[
                             styles.logDelta,
-                            { color: theme.colors.onSurface },
+                            {
+                              color: theme.colors.onPrimaryContainer,
+                            },
                           ]}
                         >
                           +{entry.points}
                         </Text>
                       </View>
+                    )}
+                  </View>
 
-                      <Text
+                  <View style={styles.timeColumn}>
+                    <Text
+                      style={[
+                        styles.logTime,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      {elapsedLabel}
+                    </Text>
+                  </View>
+
+                  <View style={styles.logTeamColumn}>
+                    {!isTeamA && (
+                      <View
                         style={[
-                          styles.logTime,
-                          { color: theme.colors.onSurfaceVariant },
+                          styles.scoreEvent,
+                          {
+                            backgroundColor: theme.colors.secondaryContainer,
+                          },
                         ]}
                       >
-                        {elapsedLabel}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </ScrollView>
-            ) : (
+                        <Text
+                          style={[
+                            styles.logDelta,
+                            {
+                              color: theme.colors.onSecondaryContainer,
+                            },
+                          ]}
+                        >
+                          +{entry.points}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              );
+            })
+          ) : (
+            <View style={styles.emptyLog}>
+              <Host matchContents>
+                <Icon
+                  name={Icon.select({
+                    ios: "basketball",
+                    android: import("@expo/material-symbols/timeline.xml"),
+                  })}
+                  size={32}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </Host>
+
               <Text
                 style={[
-                  styles.durationText,
+                  styles.emptyLogText,
                   { color: theme.colors.onSurfaceVariant },
                 ]}
               >
                 No score events for this game.
               </Text>
-            )}
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setLogVisible(false)}>Close</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+            </View>
+          )}
+        </BottomSheetScrollView>
+      </BottomSheet>
     </Pressable>
   );
 };
@@ -323,13 +426,13 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "flex-start", // Changed from flex-end to flex-start
+    justifyContent: "flex-start", 
     marginBottom: 12,
   },
   dateText: {
     fontFamily: "SpaceGrotesk_400Regular",
     fontSize: 12,
-    paddingLeft: 4, // Aligns slightly better with the icons below
+    paddingLeft: 4, 
   },
   mainContent: {
     flexDirection: "row",
@@ -387,7 +490,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   logList: {
-    maxHeight: 260,
+    maxHeight: "100%",
   },
   logRow: {
     flexDirection: "row",
@@ -423,6 +526,80 @@ const styles = StyleSheet.create({
     fontSize: 11,
     minWidth: 52,
     textAlign: "right",
+  },
+
+  sheetContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+
+  sheetHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+
+  sheetTitle: {
+    fontFamily: "SpaceGrotesk_500Medium",
+    fontSize: 24,
+  },
+
+  sheetSubtitle: {
+    fontSize: 14,
+    marginTop: 2,
+  },
+
+  teamHeaders: {
+    flexDirection: "row",
+    marginBottom: 8,
+  },
+
+  teamHeader: {
+    flex: 1,
+    alignItems: "center",
+  },
+
+  teamHeaderText: {
+    fontFamily: "SpaceGrotesk_500Medium",
+    fontSize: 15,
+    maxWidth: "90%",
+  },
+
+  logListContent: {
+    paddingBottom: 24,
+  },
+
+  logTeamColumn: {
+    flex: 1,
+    alignItems: "center",
+  },
+
+  timeColumn: {
+    width: 64,
+    alignItems: "center",
+  },
+
+  scoreEvent: {
+    minWidth: 48,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  emptyLog: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  emptyLogText: {
+    fontSize: 14,
+  },
+
+  emptyLogContent: {
+    flexGrow: 1,
   },
 });
 
