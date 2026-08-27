@@ -110,11 +110,11 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
 
   const totalPoints = scoreA + scoreB;
   const progressValue =
-    totalPoints > 0
-      ? scoreA >= scoreB
+    totalPoints > 0 && scoreA !== scoreB
+      ? scoreA > scoreB
         ? scoreA / totalPoints
         : scoreB / totalPoints
-      : 0.5;
+      : 0;
 
   const openRenameDialog = async (team: "A" | "B") => {
     onGameActivity();
@@ -366,7 +366,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-
   },
   compactTeamBlock: {
     paddingVertical: 4,
